@@ -1,5 +1,5 @@
 {
-  "name": "riskmap-florida",
+  "name": "risk-map",
   "type": "project:application",
   "platform": {
     "id": "web",
@@ -23,6 +23,12 @@
     "displayName": "None",
     "fileExtension": ".html",
     "source": "src/**/*.html"
+  },
+  "lessProcessor": {
+    "id": "less",
+    "displayName": "Less",
+    "fileExtension": ".less",
+    "source": "src/**/*.less"
   },
   "cssProcessor": {
     "id": "none",
@@ -131,6 +137,11 @@
             "path": "../node_modules/aurelia-testing/dist/amd",
             "main": "aurelia-testing",
             "env": "dev"
+          },
+          {
+            "name": "jquery",
+            "path": "../node_modules/jquery/dist",
+            "main": "jquery"
           }
         ]
       }
