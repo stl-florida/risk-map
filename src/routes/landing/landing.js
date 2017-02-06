@@ -7,7 +7,7 @@ export class Landing {
       container: 'mapContainer',
       center: [-80.25, 26.00],
       zoom: 10,
-      style: 'mapbox://styles/mapbox/dark-v9',
+      style: 'mapbox://styles/mapbox/light-v9',
       hash: false
     });
   }
