@@ -142,6 +142,14 @@
             "name": "jquery",
             "path": "../node_modules/jquery/dist",
             "main": "jquery"
+          },
+          {
+            "name": "mapbox-gl",
+            "path": "../node_modules/mapbox-gl/dist",
+            "main": "mapbox-gl",
+            "resources": [
+              "mapbox-gl.css"
+            ]
           }
         ]
       }

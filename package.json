@@ -8,11 +8,13 @@
   },
   "license": "MIT",
   "dependencies": {
-    "aurelia-bootstrapper": "^1.0.0",
     "aurelia-animator-css": "^1.0.0",
+    "aurelia-bootstrapper": "^1.0.0",
     "bluebird": "^3.4.1",
+    "gulp-less": "^3.3.0",
     "jquery": "^3.1.1",
     "less": "^2.7.1",
+    "mapbox-gl": "^0.32.1",
     "requirejs": "^2.3.2",
     "text": "github:requirejs/text#latest"
   },
