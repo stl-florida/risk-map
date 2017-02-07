@@ -107,6 +107,7 @@
           "aurelia-framework",
           "aurelia-history",
           "aurelia-history-browser",
+          "aurelia-http-client",
           "aurelia-loader",
           "aurelia-loader-default",
           "aurelia-logging",
@@ -150,6 +151,11 @@
             "resources": [
               "mapbox-gl.css"
             ]
+          },
+          {
+            "name": "topojson-client",
+            "path": "../node_modules/topojson-client/dist",
+            "main": "topojson-client"
           }
         ]
       }
