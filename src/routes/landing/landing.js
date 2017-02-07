@@ -3,6 +3,7 @@ import {HttpClient} from 'aurelia-http-client';
 import * as topojson from 'topojson-client';
 
 export class Landing {
+  /*
   // Get topojson data from server, return geojson
   getData(file_name) {
     var self = this,
@@ -26,8 +27,41 @@ export class Landing {
       }).catch(err => reject(err));
     });
   }
+  */
 
-  addFldHazLayer(map, code, layer_name) {
+  toggleButton() {
+    var toggleSpeed = 200;
+    if ($('#toolBar').hasClass('active')) {
+      //Close
+      $('.buttonIcon').toggleClass('active');
+      $('#toolBar').animate({
+        left: '-300px'
+      }, toggleSpeed, () => {
+        $('#toolBar').removeClass('active');
+      });
+      $('#toggleButton').animate({
+        left: '0px'
+      }, toggleSpeed);
+      $('#mapContainer').animate({
+        width: '100%'
+      }, toggleSpeed);
+    } else {
+      //Open
+      $('.buttonIcon').toggleClass('active');
+      $('#toolBar').addClass('active');
+      $('#toolBar').animate({
+        left: '0px'
+      }, toggleSpeed);
+      $('#toggleButton').animate({
+        left: '300px'
+      }, toggleSpeed);
+      $('#mapContainer').animate({
+        width: (($(window).width() - 300) * 100 / $(window).width()) + '%'
+      }, toggleSpeed);
+    }
+  }
+
+  addFillLayer(map, code, layer_name, color, opacity) {
     return map.addLayer({
       'id': layer_name,
       'type': 'fill',
@@ -37,8 +71,8 @@ export class Landing {
       },
       'source-layer': layer_name,
       'paint': {
-        'fill-color': '#31aade',
-        'fill-opacity': 0.75
+        'fill-color': color,
+        'fill-opacity': opacity
       }
     });
   }
@@ -48,13 +82,18 @@ export class Landing {
     mapboxgl.accessToken = 'pk.eyJ1IjoiYXNiYXJ2ZSIsImEiOiI4c2ZpNzhVIn0.A1lSinnWsqr7oCUo0UMT7w';
     self.map = new mapboxgl.Map({
       container: 'mapContainer',
-      center: [-80.25, 26.00],
+      center: [-80.25, 26.15],
       zoom: 10,
       style: 'mapbox://styles/mapbox/dark-v9',
       hash: false
     });
     self.map.on('load', () => {
-      self.addFldHazLayer(self.map, '0gca7i8n', 'FLDHAZ_AE');
+      self.addFillLayer(self.map, '4cou1y2j', 'FLDHAE', '#c1272d', 0.8);
+      self.addFillLayer(self.map, '758t0cbw', 'FLDHAH', '#c1272d', 0.5);
+      self.addFillLayer(self.map, '44qg0o2f', 'FLDHX', '#c1272d', 0.2);
+      self.addFillLayer(self.map, '1eqmjn9o', 'FLDHAO', '#c1272d', 1);
+      self.addFillLayer(self.map, 'b0mn3fbb', 'FLDHVE', '#c1272d', 0.1);
+      self.addFillLayer(self.map, 'c5vfi3yr', 'S_WTR', '#31aade', 1);
     });
   }
 }
