@@ -3,6 +3,10 @@ import {HttpClient} from 'aurelia-http-client';
 import * as topojson from 'topojson-client';
 
 export class Landing {
+  constructor() {
+    this.controlGroups = [];
+    this.controls = [];
+  }
   /*
   // Get topojson data from server, return geojson
   getData(file_name) {
@@ -29,47 +33,64 @@ export class Landing {
   }
   */
 
-  toggleButton() {
+  toggleToolbar() {
     var toggleSpeed = 200;
-    if ($('#toolBar').hasClass('active')) {
+    var toolBarWidth = $('#toolbar_wrapper').width();
+    if ($('#toolbar_wrapper').hasClass('active')) {
       //Close
       $('.buttonIcon').toggleClass('active');
-      $('#toolBar').animate({
-        left: '-300px'
+      $('#toolbar_wrapper').animate({
+        left: -toolBarWidth + 'px'
       }, toggleSpeed, () => {
-        $('#toolBar').removeClass('active');
+        $('#toolbar_wrapper').removeClass('active');
       });
-      $('#toggleButton').animate({
+      $('#toolbar_control_wrapper').animate({
         left: '0px'
       }, toggleSpeed);
-      $('#mapContainer').animate({
+      $('#map_wrapper').animate({
         width: '100%'
       }, toggleSpeed);
     } else {
       //Open
       $('.buttonIcon').toggleClass('active');
-      $('#toolBar').addClass('active');
-      $('#toolBar').animate({
+      $('#toolbar_wrapper').addClass('active');
+      $('#toolbar_wrapper').animate({
         left: '0px'
       }, toggleSpeed);
-      $('#toggleButton').animate({
-        left: '300px'
+      $('#toolbar_control_wrapper').animate({
+        left: toolBarWidth + 'px'
       }, toggleSpeed);
-      $('#mapContainer').animate({
-        width: (($(window).width() - 300) * 100 / $(window).width()) + '%'
+      $('#map_wrapper').animate({
+        width: (($(window).width() - toolBarWidth) * 100 / $(window).width()) + '%'
       }, toggleSpeed);
     }
   }
 
-  addFillLayer(map, code, layer_name, color, opacity) {
-    return map.addLayer({
-      'id': layer_name,
+  toggleLayer(layer_id) {
+    $('#toggle_'+layer_id).toggleClass('active');
+    var visibility = this.map.getLayoutProperty(layer_id, 'visibility');
+    if (visibility === 'visible') {
+      this.map.setLayoutProperty(layer_id, 'visibility', 'none');
+    } else {
+      this.map.setLayoutProperty(layer_id, 'visibility', 'visible');
+    }
+  }
+
+  addFillLayer(group_no, label, code, layer_id, color, opacity, toggleable, visibility) {
+    if (toggleable) {
+      this.controlGroups[group_no].controls.push({name: label, id: layer_id});
+    }
+    return this.map.addLayer({
+      'id': layer_id,
       'type': 'fill',
       'source': {
         'type': 'vector',
         'url': 'mapbox://asbarve.' + code //TODO: catch get tile error, shows in console when viewing tiles outside of layer bounds
       },
-      'source-layer': layer_name,
+      'source-layer': layer_id,
+      'layout': {
+        'visibility': visibility
+      },
       'paint': {
         'fill-color': color,
         'fill-opacity': opacity
@@ -81,19 +102,35 @@ export class Landing {
     var self = this;
     mapboxgl.accessToken = 'pk.eyJ1IjoiYXNiYXJ2ZSIsImEiOiI4c2ZpNzhVIn0.A1lSinnWsqr7oCUo0UMT7w';
     self.map = new mapboxgl.Map({
-      container: 'mapContainer',
+      container: 'map_wrapper',
       center: [-80.25, 26.15],
       zoom: 10,
       style: 'mapbox://styles/mapbox/dark-v9',
       hash: false
     });
     self.map.on('load', () => {
-      self.addFillLayer(self.map, '4cou1y2j', 'FLDHAE', '#c1272d', 0.8);
-      self.addFillLayer(self.map, '758t0cbw', 'FLDHAH', '#c1272d', 0.5);
-      self.addFillLayer(self.map, '44qg0o2f', 'FLDHX', '#c1272d', 0.2);
-      self.addFillLayer(self.map, '1eqmjn9o', 'FLDHAO', '#c1272d', 1);
-      self.addFillLayer(self.map, 'b0mn3fbb', 'FLDHVE', '#c1272d', 0.1);
-      self.addFillLayer(self.map, 'c5vfi3yr', 'S_WTR', '#31aade', 1);
+      // Push object to self.controlGroups only if atleast one layer is toggleable
+      //Control group '0'
+      self.controlGroups.push({name: 'Flood Hazard Extents', id: 'fld_haz_ext', controls: []});
+      self.addFillLayer('0', 'Hazard AO', '1eqmjn9o', 'FLDHAO', '#31aade', 1, true, 'visible');
+      self.addFillLayer('0', 'Hazard AE', '4cou1y2j', 'FLDHAE', '#31aade', 0.8, true, 'visible');
+      self.addFillLayer('0', 'Hazard AH', '758t0cbw', 'FLDHAH', '#31aade', 0.5, true, 'visible');
+      self.addFillLayer('0', 'Hazard X', '44qg0o2f', 'FLDHX', '#31aade', 0.2, true, 'visible');
+      self.addFillLayer('0', 'Hazard VE', 'b0mn3fbb', 'FLDHVE', '#31aade', 0.1, true, 'visible');
+
+      //Control group '1'
+      self.controlGroups.push({name: 'Water infrastructure', id: 'wtr_inf', controls: []});
+      self.addFillLayer('1', 'Water bodies', 'c5vfi3yr', 'S_WTR', '#1a1a1a', 1, true, 'visible'); //Match mapbox style water color
     });
+  }
+
+  toggleGroup(group_name) {
+    $('.groupWrapper:not(#group_' + group_name + ')').slideUp("fast");
+    $('#group_' + group_name).slideToggle("fast");
+    if ($('.groupToggle:not(#toggle_' + group_name + ') > i.icon-up-open').hasClass('active')) {
+      $('.groupToggle:not(#toggle_' + group_name + ') > i.icon-up-open').removeClass('active');
+      $('.groupToggle:not(#toggle_' + group_name + ') > i.icon-down-open').addClass('active');
+    }
+    $('#toggle_' + group_name + ' > i').toggleClass("active");
   }
 }

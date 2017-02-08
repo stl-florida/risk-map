@@ -1,26 +1,70 @@
 @import "../../styles/themeGuide.less";
 
-#toolBar {
+//id : snake_case (must have 2 or more syllables)
+//class : case / camelCase (1 or 2 syllables)
+//suffix div element id's with _wrapper
+
+#toolbar_wrapper {
   display: none;
   position: absolute;
-  left: -300px;
-  width: 300px;
+  left: -@tool-bar-width;
+  width: @tool-bar-width;
   height: 100%;
+  padding-top: 8px;
   background-color: @dark-gray;
   z-index: 1000;
   &.active {
     display: block;
   }
+  & .controlGroups {
+    padding: 4px 0px;
+    & .groupToggle {
+      width: 100%;
+      background-color: @dark-gray;
+      border: none;
+      border-bottom: 1px solid @water-blue;
+      color: @water-blue;
+      text-align: left;
+      cursor: pointer;
+      outline: none;
+      & i {
+        display: none;
+        &.active {
+          display: inline;
+        }
+      }
+    }
+    & .groupWrapper {
+      display: none;
+      position: relative;
+      padding: 0px 8px 1px 8px;
+      border-bottom: 1px solid @water-blue;
+      & .layerControls {
+        width: 100%;
+        margin: 0px;
+        background-color: @dark-gray;
+        border: none;
+        color: @snow-white;
+        outline: none;
+        &.active {
+          background-color: @water-blue;
+        }
+        &:hover {
+          background-color: darken(@water-blue, 20%);
+        }
+      }
+    }
+  }
 }
 
-#mapContainer {
+#map_wrapper {
   position: absolute;
   right: 0px;
   width: 100%;
   height: 100%;
 }
 
-#toggleButton {
+#toolbar_control_wrapper {
   position: absolute;
   top: 30px;
   left: 0px;
