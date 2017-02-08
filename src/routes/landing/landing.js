@@ -153,6 +153,7 @@ export class Landing {
       //Control group '2'
       self.controlGroups.push({name: 'Physical infrastructure', id: 'phy_inf', controls: []});
       self.add3dLayer('2', '3D buildings', '3d_buildings', 'visible');
+      self.addFillLayer('2', 'Future landuse', '2kwgic7s', 'landuse', '#f05022', 0.2, true, 'visible');
 
     });
   }
