@@ -5,12 +5,13 @@
     <div repeat.for="group of controlGroups" class="controlGroups">
       <button id.bind="'toggle_'+group.id" class="groupToggle" click.delegate="toggleGroup(group.id)"><i class="icon-down-open active"></i><i class="icon-up-open"></i>&nbsp;&nbsp;${group.name}</button>
       <div id.bind="'group_'+group.id" class="groupWrapper">
-        <button repeat.for="control of group.controls" id.bind="'toggle_'+control.id" class="layerControls active" click.delegate="toggleLayer(control.id)">${control.name}</button>
+        <button repeat.for="control of group.controls" id.bind="'toggle_'+control.id" class="layerControls" click.delegate="toggleLayer(control.id)">${control.name}</button>
       </div>
     </div>
   </div>
   <div id="map_wrapper">
   </div>
+  <img id="url_logo" src="assets/graphics/URL_logo.svg"></img>
   <div id="toolbar_control_wrapper" click.delegate="toggleToolbar()">
     <p class="buttonIcon active"><i class="icon-menu"></i></p>
     <p class="buttonIcon"><i class="icon-left-open"></i></p>

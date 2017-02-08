@@ -1,37 +1,13 @@
 import mapboxgl from 'mapbox-gl';
 import {HttpClient} from 'aurelia-http-client';
 import * as topojson from 'topojson-client';
+import lbcsCodes from '../../styles/lbcs';
 
 export class Landing {
   constructor() {
     this.controlGroups = [];
     this.controls = [];
   }
-  /*
-  // Get topojson data from server, return geojson
-  getData(file_name) {
-    var self = this,
-        url = 'https://raw.githubusercontent.com/stl-florida/data-layers/master/' + file_name + '.json';
-    let client = new HttpClient();
-    return new Promise((resolve, reject) => {
-      client.get(url)
-      .then(data => {
-        var topology = JSON.parse(data);
-        console.log(topology);
-        if (topology.statusCode === 200) {
-          var result = topology.result;
-          if (result && result.objects) {
-            resolve(topojson.feature(result, result.objects[file_name]));
-          } else {
-            resolve(null);
-          }
-        } else {
-          resolve(null);
-        }
-      }).catch(err => reject(err));
-    });
-  }
-  */
 
   toggleToolbar() {
     var toggleSpeed = 200;
@@ -129,6 +105,7 @@ export class Landing {
     var self = this;
     mapboxgl.accessToken = 'pk.eyJ1IjoiYXNiYXJ2ZSIsImEiOiI4c2ZpNzhVIn0.A1lSinnWsqr7oCUo0UMT7w';
     self.map = new mapboxgl.Map({
+      attributionControl: false,
       container: 'map_wrapper',
       center: [-80.25, 26.15],
       zoom: 10,
@@ -139,19 +116,20 @@ export class Landing {
       // Push object to self.controlGroups only if atleast one layer is toggleable
       //Control group '0'
       self.controlGroups.push({name: 'Flood Hazard Extents', id: 'fld_haz_ext', controls: []});
-      self.addFillLayer('0', 'Hazard AO', '1eqmjn9o', 'FLDHAO', '#31aade', 1, true, 'visible');
-      self.addFillLayer('0', 'Hazard AE', '4cou1y2j', 'FLDHAE', '#31aade', 0.8, true, 'visible');
-      self.addFillLayer('0', 'Hazard AH', '758t0cbw', 'FLDHAH', '#31aade', 0.5, true, 'visible');
-      self.addFillLayer('0', 'Hazard X', '44qg0o2f', 'FLDHX', '#31aade', 0.2, true, 'visible');
-      self.addFillLayer('0', 'Hazard VE', 'b0mn3fbb', 'FLDHVE', '#31aade', 0.1, true, 'visible');
+      self.addFillLayer('0', 'Hazard AO', '1eqmjn9o', 'FLDHAO', '#31aade', 1, true, 'none');
+      self.addFillLayer('0', 'Hazard AE', '4cou1y2j', 'FLDHAE', '#31aade', 0.8, true, 'none');
+      self.addFillLayer('0', 'Hazard AH', '758t0cbw', 'FLDHAH', '#31aade', 0.5, true, 'none');
+      self.addFillLayer('0', 'Hazard X', '44qg0o2f', 'FLDHX', '#31aade', 0.2, true, 'none');
+      self.addFillLayer('0', 'Hazard VE', 'b0mn3fbb', 'FLDHVE', '#31aade', 0.1, true, 'none');
 
       //Control group '1'
       self.controlGroups.push({name: 'Water infrastructure', id: 'wtr_inf', controls: []});
-      self.addFillLayer('1', 'Water bodies', 'c5vfi3yr', 'S_WTR', '#1a1a1a', 1, true, 'visible'); //Match mapbox style water color
+      self.addFillLayer('1', 'Water bodies', 'c5vfi3yr', 'S_WTR', '#1a1a1a', 1, true, 'none'); //Match mapbox style water color
 
       //Control group '2'
       self.controlGroups.push({name: 'Physical infrastructure', id: 'phy_inf', controls: []});
-      self.add3dLayer('2', '3D buildings', '3d_buildings', 'visible');
+      self.add3dLayer('2', '3D buildings', '3d_buildings', 'none');
+      self.addFillLayer('2', 'Future landuse', '2kwgic7s', 'landuse', lbcsCodes, 0.75, true, 'none');
     });
   }
 
