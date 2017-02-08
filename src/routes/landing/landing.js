@@ -98,7 +98,6 @@ export class Landing {
     });
   }
 
-
   add3dLayer(group_no, label, layer_id, visibility) {
     this.controlGroups[group_no].controls.push({name: label, id: layer_id});
     return this.map.addLayer({
@@ -153,7 +152,6 @@ export class Landing {
       //Control group '2'
       self.controlGroups.push({name: 'Physical infrastructure', id: 'phy_inf', controls: []});
       self.add3dLayer('2', '3D buildings', '3d_buildings', 'visible');
-
     });
   }
 
