@@ -98,6 +98,34 @@ export class Landing {
     });
   }
 
+
+  add3dLayer(group_no, label, layer_id, visibility) {
+    this.controlGroups[group_no].controls.push({name: label, id: layer_id});
+    return this.map.addLayer({
+     'id': layer_id,
+     'source': 'composite',
+     'source-layer': 'building',
+     'filter': ['==', 'extrude', 'true'],
+     'type': 'fill-extrusion',
+     'minzoom': 10,
+     'layout': {
+       'visibility': visibility
+     },
+     'paint': {
+       'fill-extrusion-color': '#aaa',
+       'fill-extrusion-height': {
+         'type': 'identity',
+         'property': 'height'
+       },
+       'fill-extrusion-base': {
+         'type': 'identity',
+         'property': 'min_height'
+       },
+       'fill-extrusion-opacity': 0.8
+     }
+   });
+  }
+
   attached() {
     var self = this;
     mapboxgl.accessToken = 'pk.eyJ1IjoiYXNiYXJ2ZSIsImEiOiI4c2ZpNzhVIn0.A1lSinnWsqr7oCUo0UMT7w';
@@ -121,10 +149,22 @@ export class Landing {
       //Control group '1'
       self.controlGroups.push({name: 'Water infrastructure', id: 'wtr_inf', controls: []});
       self.addFillLayer('1', 'Water bodies', 'c5vfi3yr', 'S_WTR', '#1a1a1a', 1, true, 'visible'); //Match mapbox style water color
+
+      //Control group '2'
+      self.controlGroups.push({name: 'Physical infrastructure', id: 'phy_inf', controls: []});
+      self.add3dLayer('2', '3D buildings', '3d_buildings', 'visible');
+
     });
   }
 
+  //Toggle only target group
   toggleGroup(group_name) {
+    $('#group_' + group_name).slideToggle("fast");
+    $('#toggle_' + group_name + ' > i').toggleClass("active");
+  }
+
+  //Toggle all open + target group
+  /*toggleGroup(group_name) {
     $('.groupWrapper:not(#group_' + group_name + ')').slideUp("fast");
     $('#group_' + group_name).slideToggle("fast");
     if ($('.groupToggle:not(#toggle_' + group_name + ') > i.icon-up-open').hasClass('active')) {
@@ -132,5 +172,5 @@ export class Landing {
       $('.groupToggle:not(#toggle_' + group_name + ') > i.icon-down-open').addClass('active');
     }
     $('#toggle_' + group_name + ' > i').toggleClass("active");
-  }
+  }*/
 }
