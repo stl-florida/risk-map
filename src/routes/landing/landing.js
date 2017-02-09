@@ -96,11 +96,11 @@ export class Landing {
       // Push object to self.controlGroups only if atleast one layer is toggleable
       //Control group '0'
       self.controlGroups.push({name: 'Flood Hazard Extents', id: 'fld_haz_ext', controls: []});
-      self.addLayer('0', 'Hazard AO', 'FLDHAO', 'fill', 'mapbox', 'vector', '1eqmjn9o', 'FLDHAO', {'fill-color': '#31aade', 'fill-opacity': 1}, 'none');
-      self.addLayer('0', 'Hazard AE', 'FLDHAE', 'fill', 'mapbox', 'vector', '4cou1y2j', 'FLDHAE', {'fill-color': '#31aade', 'fill-opacity': 0.8}, 'none');
-      self.addLayer('0', 'Hazard AH', 'FLDHAH', 'fill', 'mapbox', 'vector', '758t0cbw', 'FLDHAH', {'fill-color': '#31aade', 'fill-opacity': 0.5}, 'none');
-      self.addLayer('0', 'Hazard X', 'FLDHX', 'fill', 'mapbox', 'vector', '44qg0o2f', 'FLDHX', {'fill-color': '#31aade', 'fill-opacity': 0.2}, 'none');
-      self.addLayer('0', 'Hazard VE', 'FLDHVE', 'fill', 'mapbox', 'vector', 'b0mn3fbb', 'FLDHVE', {'fill-color': '#31aade', 'fill-opacity': 0.1}, 'none');
+      self.addLayer('0', 'Hazard VE', 'FLDHVE', 'fill', 'mapbox', 'vector', 'b0mn3fbb', 'FLDHVE', {'fill-color': '#31aade', 'fill-opacity': 1}, 'none');
+      self.addLayer('0', 'Hazard AO', 'FLDHAO', 'fill', 'mapbox', 'vector', '1eqmjn9o', 'FLDHAO', {'fill-color': '#31aade', 'fill-opacity': 0.8}, 'none');
+      self.addLayer('0', 'Hazard AE', 'FLDHAE', 'fill', 'mapbox', 'vector', '4cou1y2j', 'FLDHAE', {'fill-color': '#31aade', 'fill-opacity': 0.5}, 'none');
+      self.addLayer('0', 'Hazard AH', 'FLDHAH', 'fill', 'mapbox', 'vector', '758t0cbw', 'FLDHAH', {'fill-color': '#31aade', 'fill-opacity': 0.2}, 'none');
+      self.addLayer('0', 'Hazard X', 'FLDHX', 'fill', 'mapbox', 'vector', '44qg0o2f', 'FLDHX', {'fill-color': '#31aade', 'fill-opacity': 0.1}, 'none');
 
       //Control group '1'
       self.controlGroups.push({name: 'Water infrastructure', id: 'wtr_inf', controls: []});
