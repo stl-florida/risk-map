@@ -115,21 +115,23 @@ export class Landing {
     self.map.on('load', () => {
       // Push object to self.controlGroups only if atleast one layer is toggleable
       //Control group '0'
-      self.controlGroups.push({name: 'Flood Hazard Extents', id: 'fld_haz_ext', controls: []});
-      self.addFillLayer('0', 'Hazard AO', '1eqmjn9o', 'FLDHAO', '#31aade', 1, true, 'none');
-      self.addFillLayer('0', 'Hazard AE', '4cou1y2j', 'FLDHAE', '#31aade', 0.8, true, 'none');
-      self.addFillLayer('0', 'Hazard AH', '758t0cbw', 'FLDHAH', '#31aade', 0.5, true, 'none');
-      self.addFillLayer('0', 'Hazard X', '44qg0o2f', 'FLDHX', '#31aade', 0.2, true, 'none');
-      self.addFillLayer('0', 'Hazard VE', 'b0mn3fbb', 'FLDHVE', '#31aade', 0.1, true, 'none');
+      self.controlGroups.push({name: 'Physical infrastructure', id: 'phy_inf', controls: []});
+      self.add3dLayer('0', '3D buildings', '3d_buildings', 'none');
+      self.addFillLayer('0', 'Future landuse', '2kwgic7s', 'landuse', lbcsCodes, 0.5, true, 'none');
 
       //Control group '1'
-      self.controlGroups.push({name: 'Water infrastructure', id: 'wtr_inf', controls: []});
-      self.addFillLayer('1', 'Water bodies', 'c5vfi3yr', 'S_WTR', '#1a1a1a', 1, true, 'none'); //Match mapbox style water color
+      self.controlGroups.push({name: 'Flood Hazard Extents', id: 'fld_haz_ext', controls: []});
+      self.addFillLayer('1', 'Hazard AO', '1eqmjn9o', 'FLDHAO', '#31aade', 1, true, 'none');
+      self.addFillLayer('1', 'Hazard AE', '4cou1y2j', 'FLDHAE', '#31aade', 0.8, true, 'none');
+      self.addFillLayer('1', 'Hazard AH', '758t0cbw', 'FLDHAH', '#31aade', 0.5, true, 'none');
+      self.addFillLayer('1', 'Hazard X', '44qg0o2f', 'FLDHX', '#31aade', 0.2, true, 'none');
+      self.addFillLayer('1', 'Hazard VE', 'b0mn3fbb', 'FLDHVE', '#31aade', 0.1, true, 'none');
 
       //Control group '2'
-      self.controlGroups.push({name: 'Physical infrastructure', id: 'phy_inf', controls: []});
-      self.add3dLayer('2', '3D buildings', '3d_buildings', 'none');
-      self.addFillLayer('2', 'Future landuse', '2kwgic7s', 'landuse', lbcsCodes, 0.75, true, 'none');
+      self.controlGroups.push({name: 'Water infrastructure', id: 'wtr_inf', controls: []});
+      self.addFillLayer('2', 'Water bodies', 'c5vfi3yr', 'S_WTR', '#1a1a1a', 1, true, 'none'); //Match mapbox style water color
+
+
     });
   }
 
