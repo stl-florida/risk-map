@@ -1,7 +1,8 @@
 import mapboxgl from 'mapbox-gl';
+import MapboxDraw from 'mapbox-gl-draw';
 import {HttpClient} from 'aurelia-http-client';
 import * as topojson from 'topojson-client';
-import lbcsCodes from '../../styles/lbcs';
+import layers from './layers';
 
 export class Landing {
   constructor() {
@@ -9,75 +10,74 @@ export class Landing {
     this.controls = [];
   }
 
-  setSource(source, source_type, source_data) {
-    switch (source) {
-      case 'mapbox':
-        return {
-          'type': source_type,
-          'url': 'mapbox://asbarve.' + source_data
-        };
-      case 'geojson_url':
-        return {
-          'type': source_type,
-          'data': source_data
-        };
+  setSource(name, type, data) {
+    switch (name) {
+      case 'mapbox': return {
+        'type': type,
+        'url': 'mapbox://asbarve.' + data
+      };
+      case 'geojson_url': return {
+        'type': type,
+        'data': data
+      };
     }
   }
 
-  addLayer(group_no, label, layer_id, type, source, source_type, source_data, source_layer, paint_properties, visibility) {
+  addLayer(properties) {
     var self = this;
-    if (visibility === 'visible') {
-      self.controlGroups[group_no].controls.push({name: label, id: layer_id, class: 'layerControls active'});
+    if (properties.render_opacity) {
+      //Always on base layers (flood hazard & landuse)
+      self.controlGroups[properties.group_no].controls.push({name: properties.label, id: properties.layer_id, tooltip: properties.tooltip_text, class: 'layerControls'});
     } else {
-      self.controlGroups[group_no].controls.push({name: label, id: layer_id, class: 'layerControls'});
+      if (properties.visibility === 'visible') {
+        self.controlGroups[properties.group_no].controls.push({name: properties.label, id: properties.layer_id, tooltip: properties.tooltip_text, class: 'layerControls active'});
+      } else {
+        self.controlGroups[properties.group_no].controls.push({name: properties.label, id: properties.layer_id, tooltip: properties.tooltip_text, class: 'layerControls'});
+      }
     }
-    switch (type) {
-      case 'fill':
-        return self.map.addLayer({
-          'id': layer_id,
-          'type': type,
-          'source': self.setSource(source, source_type, source_data),
-          'source-layer': source_layer,
-          'layout': {
-            'visibility': visibility
-          },
-          'paint': paint_properties
-        });
-      case 'line':
-        return self.map.addLayer({
-          'id': layer_id,
-          'type': type,
-          'source': self.setSource(source, source_type, source_data),
-          'source-layer': source_layer,
-          'layout': {
-            'visibility': visibility
-          },
-          'paint': paint_properties
-        });
-      case 'circle':
-        return self.map.addLayer({
-          'id': layer_id,
-          'type': type,
-          'source': self.setSource(source, source_type, source_data),
-          'source-layer': source_layer,
-          'layout': {
-            'visibility': visibility
-          },
-          'paint': paint_properties
-        });
-      case 'fill-extrusion':
-        return self.map.addLayer({
-          'id': layer_id,
-          'type': type,
-          'source': 'composite',
-          'source-layer': 'building',
-          'filter': ['==', 'extrude', 'true'],
-          'minzoom': 10,
-          'layout': {
-            'visibility': visibility
-          },
-          'paint': paint_properties
-        });
+    switch (properties.type) {
+      case 'fill': return self.map.addLayer({
+        'id': properties.layer_id,
+        'type': properties.type,
+        'source': self.setSource(properties.source.name, properties.source.type, properties.source.data),
+        'source-layer': properties.source.layer,
+        'layout': {
+          'visibility': properties.visibility
+        },
+        'paint': properties.paint
+      });
+      case 'line': return self.map.addLayer({
+        'id': properties.layer_id,
+        'type': properties.type,
+        'source': self.setSource(properties.source.name, properties.source.type, properties.source.data),
+        'source-layer': properties.source.layer,
+        'layout': {
+          'visibility': properties.visibility
+        },
+        'paint': properties.paint
+      });
+      case 'circle': return self.map.addLayer({
+        'id': properties.layer_id,
+        'type': properties.type,
+        'source': self.setSource(properties.source.name, properties.source.type, properties.source.data),
+        'source-layer': properties.source.layer,
+        'layout': {
+          'visibility': properties.visibility
+        },
+        'paint': properties.paint
+      });
+      case 'fill-extrusion': return self.map.addLayer({
+        'id': properties.layer_id,
+        'type': properties.type,
+        'source': 'composite',
+        'source-layer': 'building',
+        'filter': ['==', 'extrude', 'true'],
+        'minzoom': 1,
+        'layout': {
+          'visibility': properties.visibility
+        },
+        'paint': properties.paint
+      });
     }
   }
 
@@ -92,32 +92,147 @@ export class Landing {
       style: 'mapbox://styles/mapbox/dark-v9',
       hash: false
     });
+
+    self.map.addControl(new mapboxgl.NavigationControl());
+
     self.map.on('load', () => {
       // Push object to self.controlGroups only if atleast one layer is toggleable
       //Control group '0'
       self.controlGroups.push({name: 'Flood Hazard Extents', id: 'fld_haz_ext', controls: []});
-      self.addLayer('0', 'Hazard AO', 'FLDHAO', 'fill', 'mapbox', 'vector', '1eqmjn9o', 'FLDHAO', {'fill-color': '#31aade', 'fill-opacity': 1}, 'none');
-      self.addLayer('0', 'Hazard AE', 'FLDHAE', 'fill', 'mapbox', 'vector', '4cou1y2j', 'FLDHAE', {'fill-color': '#31aade', 'fill-opacity': 0.8}, 'none');
-      self.addLayer('0', 'Hazard AH', 'FLDHAH', 'fill', 'mapbox', 'vector', '758t0cbw', 'FLDHAH', {'fill-color': '#31aade', 'fill-opacity': 0.5}, 'none');
-      self.addLayer('0', 'Hazard X', 'FLDHX', 'fill', 'mapbox', 'vector', '44qg0o2f', 'FLDHX', {'fill-color': '#31aade', 'fill-opacity': 0.2}, 'none');
-      self.addLayer('0', 'Hazard VE', 'FLDHVE', 'fill', 'mapbox', 'vector', 'b0mn3fbb', 'FLDHVE', {'fill-color': '#31aade', 'fill-opacity': 0.1}, 'none');
+      self.addLayer(layers.FLDHVE);
+      self.addLayer(layers.FLDHAO);
+      self.addLayer(layers.FLDHAE);
+      self.addLayer(layers.FLDHAH);
+      self.addLayer(layers.FLDHX);
 
       //Control group '1'
-      self.controlGroups.push({name: 'Water infrastructure', id: 'wtr_inf', controls: []});
-      self.addLayer('1', 'Water bodies', 'S_WTR', 'fill', 'mapbox', 'vector', 'c5vfi3yr', 'S_WTR', {'fill-color': '#1a1a1a'}, 'none'); //Match mapbox style water color
-      self.addLayer('1', 'City boundaries', 'city_boundary', 'line', 'geojson_url', 'geojson', 'https://raw.githubusercontent.com/stl-florida/data-layers/master/cities.geojson', '', {'line-color': '#aaaaaa'}, 'none');
-      self.addLayer('1', 'Salt water intrusion', 'salt_water', 'line', 'geojson_url', 'geojson', 'https://raw.githubusercontent.com/stl-florida/data-layers/master/saltwaterFlorida.geojson', '', {'line-color': '#c1272d', 'line-width': 3}, 'visible');
+      self.controlGroups.push({name: 'Water Infrastructure', id: 'wtr_inf', controls: []});
+      self.addLayer(layers.water_bodies);
+      self.addLayer(layers.salt_water_intrusion);
 
       //Control group '2'
-      self.controlGroups.push({name: 'Physical infrastructure', id: 'phy_inf', controls: []});
-      self.addLayer('2', '3D buildings', '3d_buildings', 'fill-extrusion', null, null, null, null, {'fill-extrusion-color': '#aaaaaa', 'fill-extrusion-height': {'type': 'identity', 'property': 'height'}, 'fill-extrusion-base': {'type': 'identity', 'property': 'min_height'}, 'fill-extrusion-opacity': 0.8}, 'none');
-      self.addLayer('2', 'Future landuse', 'landuse', 'fill', 'mapbox', 'vector', '2kwgic7s', 'landuse', {'fill-color': lbcsCodes, 'fill-opacity': 0.8}, 'none');
-      self.addLayer('2', 'RedCross locations', 'red_cross', 'circle', 'geojson_url', 'geojson', 'https://raw.githubusercontent.com/stl-florida/data-layers/master/redCross.geojson', '', {'circle-color': '#c1272d', 'circle-radius': 6, 'circle-opacity': 0.8}, 'none');
+      self.controlGroups.push({name: 'City Data', id: 'city_data', controls: []});
+      self.addLayer(layers.landuse);
+      self.addLayer(layers.city_boundaries);
+
+      //Control group '3'
+      self.controlGroups.push({name: 'Physical Infrastructure', id: 'phy_inf', controls: []});
+      self.addLayer(layers.red_cross);
+      self.addLayer(layers.buildings);
     });
+
+    var popup = new mapboxgl.Popup({
+        closeButton: true,
+        closeOnClick: false
+    });
+    self.map.on('click', (e) => {
+      var features = self.map.queryRenderedFeatures(e.point, {layers: ['red_cross', '3d_buildings']});
+      var landuse = self.map.queryRenderedFeatures(e.point, {layers: ['landuse']});
+      var fldhaz = self.map.queryRenderedFeatures(e.point, {layers: ['FLDHVE', 'FLDHAO', 'FLDHAE', 'FLDHAH', 'FLDHX']});
+      if (features.length) {
+        var feature = features[0];
+        var landuse_info = 'Undefined';
+        var fldhaz_info = 'Undefined';
+        if (landuse.length) {
+          landuse_info = landuse[0].properties.LAND_USE;
+        }
+        if (fldhaz.length) {
+          fldhaz_info = layers[fldhaz[0].layer.id].label;
+        }
+        switch (feature.layer.id) {
+          case 'red_cross':
+            self.map.flyTo({center: feature.geometry.coordinates});
+            popup.setLngLat(feature.geometry.coordinates)
+            .setHTML('Name: ' + feature.properties.NAMES_ + '<br>Address: ' + feature.properties.ADDRESSES + '<br>Capacity: ' + feature.properties.CAPACITY + '<br>Phone: ' + feature.properties.PHONE + '<br>Flood vulnerability: ' + fldhaz_info);
+            break;
+          case '3d_buildings':
+            self.map.flyTo({center: e.lngLat});
+            popup.setLngLat(e.lngLat);
+            popup.setHTML('Building type: ' + feature.properties.type + '<br>Landuse: ' + landuse_info + '<br>Flood vulnerability: ' + fldhaz_info);
+            break;
+          default:
+            popup.setHTML('');
+        }
+        popup.addTo(self.map);
+      }
+    });
+
+    var draw = new MapboxDraw({
+      displayControlsDefault: false,
+      controls: {
+        point: true,
+        polygon: true,
+        trash: true
+      }
+    });
+    self.map.addControl(draw);
+
+    self.map.on('draw.delete', () => {
+      popup.remove();
+    });
+
+    self.map.on('draw.selectionchange', feature => {
+      popup.remove();
+      if (feature.features.length) {
+        var center;
+        var landuse;
+        var fldhaz;
+        var landuse_info = 'Undefined';
+        var fldhaz_info = 'Undefined';
+        if (feature.features[0].geometry.type === 'Point') {
+          center = feature.features[0].geometry.coordinates;
+          landuse = self.map.queryRenderedFeatures(self.map.project(center), {layers: ['landuse']});
+          fldhaz = self.map.queryRenderedFeatures(self.map.project(center), {layers: ['FLDHVE', 'FLDHAO', 'FLDHAE', 'FLDHAH', 'FLDHX']});
+          self.map.flyTo({center: center});
+          if (landuse.length) {
+            landuse_info = landuse[0].properties.LAND_USE;
+          }
+          if (fldhaz.length) {
+            fldhaz_info = layers[fldhaz[0].layer.id].label;
+          }
+          popup.setLngLat(center)
+          .setHTML('Landuse: ' + landuse_info + '<br>Flood vulnerability: ' + fldhaz_info);
+        } else if (feature.features[0].geometry.type === 'Polygon') {
+          center = turf.centroid(feature.features[0]).geometry.coordinates;
+          landuse = self.map.queryRenderedFeatures(self.map.project(center), {layers: ['landuse']});
+          fldhaz = self.map.queryRenderedFeatures(self.map.project(center), {layers: ['FLDHVE', 'FLDHAO', 'FLDHAE', 'FLDHAH', 'FLDHX']});
+          self.map.flyTo({center: center});
+          if (landuse.length) {
+            landuse_info = landuse[0].properties.LAND_USE;
+          }
+          if (fldhaz.length) {
+            fldhaz_info = layers[fldhaz[0].layer.id].label;
+          }
+          popup.setLngLat(center)
+          .setHTML('Area: ' + Math.round(turf.area(feature.features[0])) + ' sqm<br>Landuse: ' + landuse_info + '<br>Flood vulnerability: ' + fldhaz_info);
+        }
+        popup.addTo(self.map);
+      }
+    });
+
+    /*
+    class ResetMapView {
+      onAdd(map) {
+        this._map = map;
+        this._container = document.createElement('div');
+        this._container.className = 'mapboxgl-ctrl';
+        this._container.textContent = 'Hello, world';
+        return this._container;
+      }
+
+      onRemove() {
+        this._container.parentNode.removeChild(this._container);
+        this._map = undefined;
+      }
+    }
+    self.map.addControl(new ResetMapView());
+  */
+
   }
 
   //Show / hide toolbar
   toggleToolbar() {
+    var self = this;
     var toggleSpeed = 200;
     var toolBarWidth = $('#toolbar_wrapper').width();
     if ($('#toolbar_wrapper').hasClass('active')) {
@@ -133,7 +248,9 @@ export class Landing {
       }, toggleSpeed);
       $('#map_wrapper').animate({
         width: '100%'
-      }, toggleSpeed);
+      }, toggleSpeed, () => {
+        self.map.resize();
+      });
     } else {
       //Open
       $('.buttonIcon').toggleClass('active');
@@ -146,18 +263,51 @@ export class Landing {
       }, toggleSpeed);
       $('#map_wrapper').animate({
         width: (($(window).width() - toolBarWidth) * 100 / $(window).width()) + '%'
-      }, toggleSpeed);
+      }, toggleSpeed, () => {
+        self.map.resize();
+      });
+    }
+  }
+
+  toggleMapview(view) {
+    var self = this;
+    var center = self.map.getCenter();
+    var zoom = self.map.getZoom();
+    $('.setview').toggleClass('active');
+    if (view === '2d') {
+      self.map.easeTo({
+        center: center,
+        zoom: zoom,
+        bearing: 0,
+        pitch: 0
+      });
+    } else if (view === '3d') {
+      self.map.easeTo({
+        center: center,
+        zoom: zoom,
+        bearing: -30,
+        pitch: 60
+      });
     }
   }
 
   //Toggle layer visibility parameter & toggle buttons appearance
   toggleLayer(layer_id) {
     $('#toggle_'+layer_id).toggleClass('active');
-    var visibility = this.map.getLayoutProperty(layer_id, 'visibility');
-    if (visibility === 'visible') {
-      this.map.setLayoutProperty(layer_id, 'visibility', 'none');
+    if (layer_id !== 'FLDHVE' && layer_id !== 'FLDHAO' && layer_id !== 'FLDHAE' && layer_id !== 'FLDHAH' && layer_id !== 'FLDHX' && layer_id !== 'landuse') {
+      var visibility = this.map.getLayoutProperty(layer_id, 'visibility');
+      if (visibility === 'visible') {
+        this.map.setLayoutProperty(layer_id, 'visibility', 'none');
+      } else {
+        this.map.setLayoutProperty(layer_id, 'visibility', 'visible');
+      }
     } else {
-      this.map.setLayoutProperty(layer_id, 'visibility', 'visible');
+      var opacity = this.map.getPaintProperty(layer_id, 'fill-opacity');
+      if (opacity === 0) {
+        this.map.setPaintProperty(layer_id, 'fill-opacity', layers[layer_id].render_opacity);
+      } else {
+        this.map.setPaintProperty(layer_id, 'fill-opacity', 0);
+      }
     }
   }
 
@@ -165,5 +315,9 @@ export class Landing {
   toggleGroup(group_name) {
     $('#group_' + group_name).slideToggle("fast");
     $('#toggle_' + group_name + ' > i').toggleClass("active");
+  }
+
+  toggleTooltip(text) {
+    this.tooltip_text = text;
   }
 }

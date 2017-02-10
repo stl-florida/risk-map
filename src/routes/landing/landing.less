@@ -16,6 +16,21 @@
   &.active {
     display: block;
   }
+  & #mapview_toggle_wrapper {
+    width: 100%;
+    & .setview {
+      width: 50%;
+      float: left;
+      background-color: @dark-gray;
+      border: none;
+      outline: none;
+      .label-medium(12px, @snow-white);
+      &.active {
+        background-color: @water-blue;
+      }
+      margin-bottom: 30px;
+    }
+  }
   & .controlGroups {
     padding: 4px 0px;
     & .groupToggle {
@@ -23,7 +38,7 @@
       background-color: @dark-gray;
       border: none;
       border-bottom: 1px solid @water-blue;
-      color: @water-blue;
+      .label-medium(12px, @water-blue);
       text-align: left;
       cursor: pointer;
       outline: none;
@@ -37,14 +52,16 @@
     & .groupWrapper {
       display: none;
       position: relative;
-      padding: 0px 8px 1px 8px;
+      padding: 0px 0px 1px 0px;
       border-bottom: 1px solid @water-blue;
       & .layerControls {
         width: 100%;
         margin: 0px;
+        padding-left: 28px;
         background-color: @dark-gray;
         border: none;
-        color: @snow-white;
+        .label-light(12px, @snow-white);
+        text-align: left;
         outline: none;
         &.active {
           background-color: @water-blue;
@@ -52,6 +69,19 @@
         &:hover {
           background-color: darken(@water-blue, 20%);
         }
+      }
+    }
+  }
+  & #tooltip_wrapper {
+    width: 100%;
+    & p {
+      padding-top: 4px;
+      padding-left: 28px;
+      padding-right: 8px;
+      margin: 0;
+      .label-light(12px, fade(@snow-white, 60%));
+      &#tooltip_header {
+        .label-medium(12px, darken(@water-blue, 20%));
       }
     }
   }
