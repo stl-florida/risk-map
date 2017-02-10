@@ -2,7 +2,7 @@ import lbcsCodes from '../../styles/lbcs';
 
 var layers = {
   //Flood Hazard Extents
-  'fldhaz_ve': {
+  'FLDHVE': {
     group_no: '0',
     label: 'Hazard VE',
     layer_id: 'FLDHVE',
@@ -15,12 +15,13 @@ var layers = {
     },
     paint: {
       'fill-color': '#31aade',
-      'fill-opacity': 1
+      'fill-opacity': 0
     },
+    render_opacity: 1, //Use for base layers which are required to remain visible
     tooltip_text: 'A high-risk area where storms drive waves landward at heights of 3 feet or more.',
-    visibility: 'none'
+    visibility: 'visible'
   },
-  'fldhaz_ao': {
+  'FLDHAO': {
     group_no: '0',
     label: 'Hazard AO',
     layer_id: 'FLDHAO',
@@ -33,12 +34,13 @@ var layers = {
     },
     paint: {
       'fill-color': '#31aade',
-      'fill-opacity': 0.9
+      'fill-opacity': 0
     },
+    render_opacity: 0.9, //Use for base layers which are required to remain visible
     tooltip_text: 'A high-risk area subject to waves less than 1.5 feet in height. This will be separated from the Coastal AE zone by the Limit of Moderate Wave Action (LiMWA). A LiMWA may not always be present, in which case, only Zone AE is shown.',
-    visibility: 'none'
+    visibility: 'visible'
   },
-  'fldhaz_ae': {
+  'FLDHAE': {
     group_no: '0',
     label: 'Hazard AE',
     layer_id: 'FLDHAE',
@@ -51,12 +53,13 @@ var layers = {
     },
     paint: {
       'fill-color': '#31aade',
-      'fill-opacity': 0.7
+      'fill-opacity': 0
     },
+    render_opacity: 0.7, //Use for base layers which are required to remain visible
     tooltip_text: 'An area subject 1% annual change of flooding (usually an area of ponding), for which BFEs have been determined; flood depths range from 1 to 3 feet.',
-    visibility: 'none'
+    visibility: 'visible'
   },
-  'fldhaz_ah': {
+  'FLDHAH': {
     group_no: '0',
     label: 'Hazard AH',
     layer_id: 'FLDHAH',
@@ -69,12 +72,13 @@ var layers = {
     },
     paint: {
       'fill-color': '#31aade',
-      'fill-opacity': 0.4
+      'fill-opacity': 0
     },
+    render_opacity: 0.4, //Use for base layers which are required to remain visible
     tooltip_text: 'An area inundated by 1% annual chance flooding (usually sheet flow on sloping terrain), for which average depths have been determined; flood depths range from 1 to 3 feet.',
-    visibility: 'none'
+    visibility: 'visible'
   },
-  'fldhaz_x': {
+  'FLDHX': {
     group_no: '0',
     label: 'Hazard X',
     layer_id: 'FLDHX',
@@ -87,10 +91,11 @@ var layers = {
     },
     paint: {
       'fill-color': '#31aade',
-      'fill-opacity': 0.1
+      'fill-opacity': 0
     },
+    render_opacity: 0.1, //Use for base layers which are required to remain visible
     tooltip_text: 'Areas of moderate risk (shown as a shaded zone X) or low risk (zone X). While the risk is reduced, nearly 25 percent of all flood claims come from these zones.',
-    visibility: 'none'
+    visibility: 'visible'
   },
   //Water Infrastructure
   'water_bodies': {
@@ -129,7 +134,7 @@ var layers = {
     visibility: 'visible'
   },
   //City data
-  'future_landuse': {
+  'landuse': {
     group_no: '2',
     label: 'Future landuse',
     layer_id: 'landuse',
@@ -142,10 +147,11 @@ var layers = {
     },
     paint: {
       'fill-color': lbcsCodes,
-      'fill-opacity': 0.8
+      'fill-opacity': 0
     },
+    render_opacity: 0.8, //Use for base layers which are required to remain visible
     tooltip_text: 'Tooltip',
-    visibility: 'none'
+    visibility: 'visible'
   },
   'city_boundaries': {
     group_no: '2',

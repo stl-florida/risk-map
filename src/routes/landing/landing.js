@@ -24,10 +24,15 @@ export class Landing {
 
   addLayer(properties) {
     var self = this;
-    if (properties.visibility === 'visible') {
-      self.controlGroups[properties.group_no].controls.push({name: properties.label, id: properties.layer_id, tooltip: properties.tooltip_text, class: 'layerControls active'});
-    } else {
+    if (properties.render_opacity) {
+      //Always on base layers (flood hazard & landuse)
       self.controlGroups[properties.group_no].controls.push({name: properties.label, id: properties.layer_id, tooltip: properties.tooltip_text, class: 'layerControls'});
+    } else {
+      if (properties.visibility === 'visible') {
+        self.controlGroups[properties.group_no].controls.push({name: properties.label, id: properties.layer_id, tooltip: properties.tooltip_text, class: 'layerControls active'});
+      } else {
+        self.controlGroups[properties.group_no].controls.push({name: properties.label, id: properties.layer_id, tooltip: properties.tooltip_text, class: 'layerControls'});
+      }
     }
     switch (properties.type) {
       case 'fill': return self.map.addLayer({
@@ -90,11 +95,11 @@ export class Landing {
       // Push object to self.controlGroups only if atleast one layer is toggleable
       //Control group '0'
       self.controlGroups.push({name: 'Flood Hazard Extents', id: 'fld_haz_ext', controls: []});
-      self.addLayer(layers.fldhaz_ve);
-      self.addLayer(layers.fldhaz_ao);
-      self.addLayer(layers.fldhaz_ae);
-      self.addLayer(layers.fldhaz_ah);
-      self.addLayer(layers.fldhaz_x);
+      self.addLayer(layers.FLDHVE);
+      self.addLayer(layers.FLDHAO);
+      self.addLayer(layers.FLDHAE);
+      self.addLayer(layers.FLDHAH);
+      self.addLayer(layers.FLDHX);
 
       //Control group '1'
       self.controlGroups.push({name: 'Water Infrastructure', id: 'wtr_inf', controls: []});
@@ -103,7 +108,7 @@ export class Landing {
 
       //Control group '2'
       self.controlGroups.push({name: 'City Data', id: 'city_data', controls: []});
-      self.addLayer(layers.future_landuse);
+      self.addLayer(layers.landuse);
       self.addLayer(layers.city_boundaries);
 
       //Control group '3'
@@ -117,24 +122,29 @@ export class Landing {
         closeOnClick: false
     });
     self.map.on('click', (e) => {
-      var features = self.map.queryRenderedFeatures(e.point, {layers: ['landuse', 'red_cross', '3d_buildings']});
+      var features = self.map.queryRenderedFeatures(e.point, {layers: ['red_cross', '3d_buildings']});
+      var landuse = self.map.queryRenderedFeatures(e.point, {layers: ['landuse']});
+      var fldhaz = self.map.queryRenderedFeatures(e.point, {layers: ['FLDHVE', 'FLDHAO', 'FLDHAE', 'FLDHAH', 'FLDHX']});
       if (features.length) {
         var feature = features[0];
+        var landuse_info = 'Undefined';
+        var fldhaz_info = 'Undefined';
+        if (landuse.length) {
+          landuse_info = landuse[0].properties.LAND_USE;
+        }
+        if (fldhaz.length) {
+          fldhaz_info = fldhaz[0].layer.id;
+        }
         switch (feature.layer.id) {
           case 'red_cross':
             self.map.flyTo({center: feature.geometry.coordinates});
             popup.setLngLat(feature.geometry.coordinates)
             .setHTML('Name: ' + feature.properties.NAMES_ + '<br>Address: ' + feature.properties.ADDRESSES + '<br>Capacity: ' + feature.properties.CAPACITY + '<br>Phone: ' + feature.properties.PHONE);
             break;
-          case 'landuse':
-            self.map.flyTo({center: e.lngLat});
-            popup.setLngLat(e.lngLat)
-            .setHTML('Area: ' + feature.properties.ACRES + 'acres<br>Landuse: ' + feature.properties.LAND_USE);
-            break;
           case '3d_buildings':
             self.map.flyTo({center: e.lngLat});
             popup.setLngLat(e.lngLat);
-            popup.setHTML('Building type: ' + feature.properties.type);
+            popup.setHTML('Building type: ' + feature.properties.type + '<br>Landuse: ' + landuse_info + '<br>Flood hazard id: ' + fldhaz_info);
             break;
           default:
             popup.setHTML('');
@@ -181,11 +191,20 @@ export class Landing {
   //Toggle layer visibility parameter & toggle buttons appearance
   toggleLayer(layer_id) {
     $('#toggle_'+layer_id).toggleClass('active');
-    var visibility = this.map.getLayoutProperty(layer_id, 'visibility');
-    if (visibility === 'visible') {
-      this.map.setLayoutProperty(layer_id, 'visibility', 'none');
+    if (layer_id !== 'FLDHVE' && layer_id !== 'FLDHAO' && layer_id !== 'FLDHAE' && layer_id !== 'FLDHAH' && layer_id !== 'FLDHX' && layer_id !== 'landuse') {
+      var visibility = this.map.getLayoutProperty(layer_id, 'visibility');
+      if (visibility === 'visible') {
+        this.map.setLayoutProperty(layer_id, 'visibility', 'none');
+      } else {
+        this.map.setLayoutProperty(layer_id, 'visibility', 'visible');
+      }
     } else {
-      this.map.setLayoutProperty(layer_id, 'visibility', 'visible');
+      var opacity = this.map.getPaintProperty(layer_id, 'fill-opacity');
+      if (opacity === 0) {
+        this.map.setPaintProperty(layer_id, 'fill-opacity', layers[layer_id].render_opacity);
+      } else {
+        this.map.setPaintProperty(layer_id, 'fill-opacity', 0);
+      }
     }
   }
 
