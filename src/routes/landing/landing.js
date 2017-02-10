@@ -71,7 +71,7 @@ export class Landing {
         'source': 'composite',
         'source-layer': 'building',
         'filter': ['==', 'extrude', 'true'],
-        'minzoom': 10,
+        'minzoom': 1,
         'layout': {
           'visibility': properties.visibility
         },
@@ -133,18 +133,18 @@ export class Landing {
           landuse_info = landuse[0].properties.LAND_USE;
         }
         if (fldhaz.length) {
-          fldhaz_info = fldhaz[0].layer.id;
+          fldhaz_info = layers[fldhaz[0].layer.id].label;
         }
         switch (feature.layer.id) {
           case 'red_cross':
             self.map.flyTo({center: feature.geometry.coordinates});
             popup.setLngLat(feature.geometry.coordinates)
-            .setHTML('Name: ' + feature.properties.NAMES_ + '<br>Address: ' + feature.properties.ADDRESSES + '<br>Capacity: ' + feature.properties.CAPACITY + '<br>Phone: ' + feature.properties.PHONE);
+            .setHTML('Name: ' + feature.properties.NAMES_ + '<br>Address: ' + feature.properties.ADDRESSES + '<br>Capacity: ' + feature.properties.CAPACITY + '<br>Phone: ' + feature.properties.PHONE + '<br>Flood vulnerability: ' + fldhaz_info);
             break;
           case '3d_buildings':
             self.map.flyTo({center: e.lngLat});
             popup.setLngLat(e.lngLat);
-            popup.setHTML('Building type: ' + feature.properties.type + '<br>Landuse: ' + landuse_info + '<br>Flood hazard id: ' + fldhaz_info);
+            popup.setHTML('Building type: ' + feature.properties.type + '<br>Landuse: ' + landuse_info + '<br>Flood vulnerability: ' + fldhaz_info);
             break;
           default:
             popup.setHTML('');
