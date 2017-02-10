@@ -38,7 +38,7 @@ var lbcsCodes = {
     ['High-50 Residential', '#dddd00'],
 
     //Industrial
-    ['Industrial', '#a0f020'],
+    ['Industrial', '#a020f0'],
 
     //Transport
     ['Transportation', '#bebebe'],

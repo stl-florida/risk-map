@@ -102,7 +102,7 @@ export class Landing {
       self.addLayer(layers.salt_water_intrusion);
 
       //Control group '2'
-      self.controlGroups.push({name: 'City Data', id: 'phy_inf', controls: []});
+      self.controlGroups.push({name: 'City Data', id: 'city_data', controls: []});
       self.addLayer(layers.future_landuse);
       self.addLayer(layers.city_boundaries);
 
@@ -110,6 +110,37 @@ export class Landing {
       self.controlGroups.push({name: 'Physical Infrastructure', id: 'phy_inf', controls: []});
       self.addLayer(layers.red_cross);
       self.addLayer(layers.buildings);
+    });
+
+    var popup = new mapboxgl.Popup({
+        closeButton: true,
+        closeOnClick: false
+    });
+    self.map.on('click', (e) => {
+      var features = self.map.queryRenderedFeatures(e.point, {layers: ['landuse', 'red_cross', '3d_buildings']});
+      if (features.length) {
+        var feature = features[0];
+        switch (feature.layer.id) {
+          case 'red_cross':
+            self.map.flyTo({center: feature.geometry.coordinates});
+            popup.setLngLat(feature.geometry.coordinates)
+            .setHTML('Name: ' + feature.properties.NAMES_ + '<br>Address: ' + feature.properties.ADDRESSES + '<br>Capacity: ' + feature.properties.CAPACITY + '<br>Phone: ' + feature.properties.PHONE);
+            break;
+          case 'landuse':
+            self.map.flyTo({center: e.lngLat});
+            popup.setLngLat(e.lngLat)
+            .setHTML('Area: ' + feature.properties.ACRES + 'acres<br>Landuse: ' + feature.properties.LAND_USE);
+            break;
+          case '3d_buildings':
+            self.map.flyTo({center: e.lngLat});
+            popup.setLngLat(e.lngLat);
+            popup.setHTML('Building type: ' + feature.properties.type);
+            break;
+          default:
+            popup.setHTML('');
+        }
+        popup.addTo(self.map);
+      }
     });
   }
 
