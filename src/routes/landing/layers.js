@@ -111,6 +111,7 @@ var layers = {
     },
     paint: {
       'fill-color': '#1a1a1a',
+      'fill-outline-color': '#31aade'
     },
     tooltip_text: 'Tooltip',
     visibility: 'none'

@@ -153,6 +153,14 @@
             ]
           },
           {
+            "name": "mapbox-gl-draw",
+            "path": "../node_modules/mapbox-gl/plugins/src/mapbox-gl-draw/v0.16.0",
+            "main": "mapbox-gl-draw",
+            "resources": [
+              "mapbox-gl-draw.css"
+            ]
+          },
+          {
             "name": "topojson-client",
             "path": "../node_modules/topojson-client/dist",
             "main": "topojson-client"

@@ -1,4 +1,5 @@
 import mapboxgl from 'mapbox-gl';
+import MapboxDraw from 'mapbox-gl-draw';
 import {HttpClient} from 'aurelia-http-client';
 import * as topojson from 'topojson-client';
 import layers from './layers';
@@ -151,6 +152,52 @@ export class Landing {
         }
         popup.addTo(self.map);
       }
+    });
+
+    var draw = new MapboxDraw({
+      displayControlsDefault: false,
+      controls: {
+        point: true,
+        polygon: true,
+        trash: true
+      }
+    });
+    self.map.addControl(draw);
+
+    self.map.on('draw.create', feature => {
+      var center;
+      var landuse;
+      var fldhaz;
+      var landuse_info = 'Undefined';
+      var fldhaz_info = 'Undefined';
+      if (feature.features[0].geometry.type === 'Point') {
+        center = feature.features[0].geometry.coordinates;
+        landuse = self.map.queryRenderedFeatures(self.map.project(center), {layers: ['landuse']});
+        fldhaz = self.map.queryRenderedFeatures(self.map.project(center), {layers: ['FLDHVE', 'FLDHAO', 'FLDHAE', 'FLDHAH', 'FLDHX']});
+        self.map.flyTo({center: center});
+        if (landuse.length) {
+          landuse_info = landuse[0].properties.LAND_USE;
+        }
+        if (fldhaz.length) {
+          fldhaz_info = layers[fldhaz[0].layer.id].label;
+        }
+        popup.setLngLat(center)
+        .setHTML('Landuse: ' + landuse_info + '<br>Flood vulnerability: ' + fldhaz_info);
+      } else if (feature.features[0].geometry.type === 'Polygon') {
+        center = turf.centroid(feature.features[0]).geometry.coordinates;
+        landuse = self.map.queryRenderedFeatures(self.map.project(center), {layers: ['landuse']});
+        fldhaz = self.map.queryRenderedFeatures(self.map.project(center), {layers: ['FLDHVE', 'FLDHAO', 'FLDHAE', 'FLDHAH', 'FLDHX']});
+        self.map.flyTo({center: center});
+        if (landuse.length) {
+          landuse_info = landuse[0].properties.LAND_USE;
+        }
+        if (fldhaz.length) {
+          fldhaz_info = layers[fldhaz[0].layer.id].label;
+        }
+        popup.setLngLat(center)
+        .setHTML('Area: ' + Math.round(turf.area(feature.features[0])) + ' sqm<br>Landuse: ' + landuse_info + '<br>Flood vulnerability: ' + fldhaz_info);
+      }
+      popup.addTo(self.map);
     });
   }
 

@@ -1,6 +1,7 @@
 <template>
   <require from="./landing.css"></require>
   <require from="mapbox-gl/mapbox-gl.css"></require>
+  <require from="mapbox-gl-draw/mapbox-gl-draw.css"></require>
   <div id="toolbar_wrapper">
     <div repeat.for="group of controlGroups" class="controlGroups">
       <button id.bind="'toggle_'+group.id" class="groupToggle" click.delegate="toggleGroup(group.id)"><i class="icon-down-open active"></i><i class="icon-up-open"></i>&nbsp;&nbsp;${group.name}</button>
@@ -10,7 +11,7 @@
     </div>
     <div id="tooltip_wrapper" if.bind="tooltip_text">
       <p id="tooltip_header">Layer information</p>
-      <p>${tooltip_text}</p>
+      <p innerhtml.bind="tooltip_text"></p>
     </div>
   </div>
   <div id="map_wrapper">
