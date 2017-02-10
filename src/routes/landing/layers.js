@@ -113,7 +113,7 @@ var layers = {
       'fill-color': '#1a1a1a',
       'fill-outline-color': '#31aade'
     },
-    tooltip_text: 'Tooltip',
+    tooltip_text: 'Water Body',
     visibility: 'none'
   },
   'salt_water_intrusion': {
@@ -131,7 +131,7 @@ var layers = {
       'line-color': '#c1272d',
       'line-width': 3
     },
-    tooltip_text: 'Tooltip',
+    tooltip_text: 'Extent of salt-water intrusion into fresh water aquifers that can lead to cantamination of drinking water sources.',
     visibility: 'visible'
   },
   //City data
@@ -151,7 +151,7 @@ var layers = {
       'fill-opacity': 0
     },
     render_opacity: 0.8, //Use for base layers which are required to remain visible
-    tooltip_text: 'Tooltip',
+    tooltip_text: 'The data set indicates the Broward County Land Use Plan designation for all parcels in Broward County.(updated September 27, 2016.)',
     visibility: 'visible'
   },
   'city_boundaries': {
@@ -168,7 +168,7 @@ var layers = {
     paint: {
       'line-color': '#aaaaaa'
     },
-    tooltip_text: 'Tooltip',
+    tooltip_text: 'Municipal boundries for the city limits within Broward county.',
     visibility: 'none'
   },
   //Physical Infrastructure
@@ -188,7 +188,7 @@ var layers = {
       'circle-radius': 6,
       'circle-opacity': 0.8
     },
-    tooltip_text: 'Tooltip',
+    tooltip_text: 'American Red Cross operated regional emergency shelters',
     visibility: 'none'
   },
   'buildings': {
@@ -214,7 +214,7 @@ var layers = {
       },
       'fill-extrusion-opacity': 0.8
     },
-    tooltip_text: 'Tooltip',
+    tooltip_text: 'Building footprints and 3d volumes',
     visibility: 'none'
   }
 };
