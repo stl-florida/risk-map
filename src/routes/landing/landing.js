@@ -209,6 +209,25 @@ export class Landing {
         popup.addTo(self.map);
       }
     });
+
+    /*
+    class ResetMapView {
+      onAdd(map) {
+        this._map = map;
+        this._container = document.createElement('div');
+        this._container.className = 'mapboxgl-ctrl';
+        this._container.textContent = 'Hello, world';
+        return this._container;
+      }
+
+      onRemove() {
+        this._container.parentNode.removeChild(this._container);
+        this._map = undefined;
+      }
+    }
+    self.map.addControl(new ResetMapView());
+  */
+
   }
 
   //Show / hide toolbar
@@ -246,6 +265,28 @@ export class Landing {
         width: (($(window).width() - toolBarWidth) * 100 / $(window).width()) + '%'
       }, toggleSpeed, () => {
         self.map.resize();
+      });
+    }
+  }
+
+  toggleMapview(view) {
+    var self = this;
+    var center = self.map.getCenter();
+    var zoom = self.map.getZoom();
+    $('.setview').toggleClass('active');
+    if (view === '2d') {
+      self.map.easeTo({
+        center: center,
+        zoom: zoom,
+        bearing: 0,
+        pitch: 0
+      });
+    } else if (view === '3d') {
+      self.map.easeTo({
+        center: center,
+        zoom: zoom,
+        bearing: -30,
+        pitch: 60
       });
     }
   }

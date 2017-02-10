@@ -16,6 +16,21 @@
   &.active {
     display: block;
   }
+  & #mapview_toggle_wrapper {
+    width: 100%;
+    & .setview {
+      width: 50%;
+      float: left;
+      background-color: @dark-gray;
+      border: none;
+      outline: none;
+      .label-medium(12px, @snow-white);
+      &.active {
+        background-color: @water-blue;
+      }
+      margin-bottom: 30px;
+    }
+  }
   & .controlGroups {
     padding: 4px 0px;
     & .groupToggle {

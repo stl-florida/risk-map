@@ -3,6 +3,10 @@
   <require from="mapbox-gl/mapbox-gl.css"></require>
   <require from="mapbox-gl-draw/mapbox-gl-draw.css"></require>
   <div id="toolbar_wrapper">
+    <div id="mapview_toggle_wrapper">
+      <button class="setview active" click.delegate="toggleMapview('2d')">2D</button>
+      <button class="setview" click.delegate="toggleMapview('3d')">3D</button>
+    </div>
     <div repeat.for="group of controlGroups" class="controlGroups">
       <button id.bind="'toggle_'+group.id" class="groupToggle" click.delegate="toggleGroup(group.id)"><i class="icon-down-open active"></i><i class="icon-up-open"></i>&nbsp;&nbsp;${group.name}</button>
       <div id.bind="'group_'+group.id" class="groupWrapper">
