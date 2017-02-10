@@ -92,6 +92,9 @@ export class Landing {
       style: 'mapbox://styles/mapbox/dark-v9',
       hash: false
     });
+
+    self.map.addControl(new mapboxgl.NavigationControl());
+
     self.map.on('load', () => {
       // Push object to self.controlGroups only if atleast one layer is toggleable
       //Control group '0'
@@ -210,6 +213,7 @@ export class Landing {
 
   //Show / hide toolbar
   toggleToolbar() {
+    var self = this;
     var toggleSpeed = 200;
     var toolBarWidth = $('#toolbar_wrapper').width();
     if ($('#toolbar_wrapper').hasClass('active')) {
@@ -225,7 +229,9 @@ export class Landing {
       }, toggleSpeed);
       $('#map_wrapper').animate({
         width: '100%'
-      }, toggleSpeed);
+      }, toggleSpeed, () => {
+        self.map.resize();
+      });
     } else {
       //Open
       $('.buttonIcon').toggleClass('active');
@@ -238,7 +244,9 @@ export class Landing {
       }, toggleSpeed);
       $('#map_wrapper').animate({
         width: (($(window).width() - toolBarWidth) * 100 / $(window).width()) + '%'
-      }, toggleSpeed);
+      }, toggleSpeed, () => {
+        self.map.resize();
+      });
     }
   }
 
