@@ -311,7 +311,6 @@ export class Landing {
     var self = this;
     for (var i = 0; i < self.controlGroups[group_no].controls.length; i+=1) {
       var layer_id = self.controlGroups[group_no].controls[i].id;
-      console.log(LAYERS[layer_id]);
       if (LAYERS[layer_id].render_opacity) {
         if ($('#toggle_all_' + group_no + ' > i.icon-check-empty').hasClass('active')) {
           $('#toggle_' + layer_id).removeClass('active');
