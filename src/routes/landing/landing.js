@@ -2,7 +2,7 @@ import mapboxgl from 'mapbox-gl';
 import MapboxDraw from 'mapbox-gl-draw';
 import {HttpClient} from 'aurelia-http-client';
 import * as topojson from 'topojson-client';
-import layers from './layers';
+import LAYERS from './layers';
 
 export class Landing {
   constructor() {
@@ -98,27 +98,27 @@ export class Landing {
     self.map.on('load', () => {
       // Push object to self.controlGroups only if atleast one layer is toggleable
       //Control group '0'
-      self.controlGroups.push({name: 'Flood Hazard Extents', id: 'fld_haz_ext', controls: []});
-      self.addLayer(layers.FLDHVE);
-      self.addLayer(layers.FLDHAO);
-      self.addLayer(layers.FLDHAE);
-      self.addLayer(layers.FLDHAH);
-      self.addLayer(layers.FLDHX);
+      self.controlGroups.push({group_no: '0', name: 'Flood Hazard Extents', id: 'fld_haz_ext', controls: []});
+      self.addLayer(LAYERS.FLDHVE);
+      self.addLayer(LAYERS.FLDHAO);
+      self.addLayer(LAYERS.FLDHAE);
+      self.addLayer(LAYERS.FLDHAH);
+      self.addLayer(LAYERS.FLDHX);
 
       //Control group '1'
-      self.controlGroups.push({name: 'Water Infrastructure', id: 'wtr_inf', controls: []});
-      self.addLayer(layers.water_bodies);
-      self.addLayer(layers.salt_water_intrusion);
+      self.controlGroups.push({group_no: '1', name: 'Water Infrastructure', id: 'wtr_inf', controls: []});
+      self.addLayer(LAYERS.water_bodies);
+      self.addLayer(LAYERS.salt_water);
 
       //Control group '2'
-      self.controlGroups.push({name: 'City Data', id: 'city_data', controls: []});
-      self.addLayer(layers.landuse);
-      self.addLayer(layers.city_boundaries);
+      self.controlGroups.push({group_no: '2', name: 'City Data', id: 'city_data', controls: []});
+      self.addLayer(LAYERS.landuse);
+      self.addLayer(LAYERS.city_boundaries);
 
       //Control group '3'
-      self.controlGroups.push({name: 'Physical Infrastructure', id: 'phy_inf', controls: []});
-      self.addLayer(layers.red_cross);
-      self.addLayer(layers.buildings);
+      self.controlGroups.push({group_no: '3', name: 'Physical Infrastructure', id: 'phy_inf', controls: []});
+      self.addLayer(LAYERS.red_cross);
+      self.addLayer(LAYERS.buildings);
     });
 
     var popup = new mapboxgl.Popup({
@@ -126,7 +126,7 @@ export class Landing {
         closeOnClick: false
     });
     self.map.on('click', (e) => {
-      var features = self.map.queryRenderedFeatures(e.point, {layers: ['red_cross', '3d_buildings']});
+      var features = self.map.queryRenderedFeatures(e.point, {layers: ['red_cross', 'buildings']});
       var landuse = self.map.queryRenderedFeatures(e.point, {layers: ['landuse']});
       var fldhaz = self.map.queryRenderedFeatures(e.point, {layers: ['FLDHVE', 'FLDHAO', 'FLDHAE', 'FLDHAH', 'FLDHX']});
       if (features.length) {
@@ -137,7 +137,7 @@ export class Landing {
           landuse_info = landuse[0].properties.LAND_USE;
         }
         if (fldhaz.length) {
-          fldhaz_info = layers[fldhaz[0].layer.id].label;
+          fldhaz_info = LAYERS[fldhaz[0].layer.id].label;
         }
         switch (feature.layer.id) {
           case 'red_cross':
@@ -145,7 +145,7 @@ export class Landing {
             popup.setLngLat(feature.geometry.coordinates)
             .setHTML('Name: ' + feature.properties.NAMES_ + '<br>Address: ' + feature.properties.ADDRESSES + '<br>Capacity: ' + feature.properties.CAPACITY + '<br>Phone: ' + feature.properties.PHONE + '<br>Flood vulnerability: ' + fldhaz_info);
             break;
-          case '3d_buildings':
+          case 'buildings':
             self.map.flyTo({center: e.lngLat});
             popup.setLngLat(e.lngLat);
             popup.setHTML('Building type: ' + feature.properties.type + '<br>Landuse: ' + landuse_info + '<br>Flood vulnerability: ' + fldhaz_info);
@@ -188,7 +188,7 @@ export class Landing {
             landuse_info = landuse[0].properties.LAND_USE;
           }
           if (fldhaz.length) {
-            fldhaz_info = layers[fldhaz[0].layer.id].label;
+            fldhaz_info = LAYERS[fldhaz[0].layer.id].label;
           }
           popup.setLngLat(center)
           .setHTML('Landuse: ' + landuse_info + '<br>Flood vulnerability: ' + fldhaz_info);
@@ -201,7 +201,7 @@ export class Landing {
             landuse_info = landuse[0].properties.LAND_USE;
           }
           if (fldhaz.length) {
-            fldhaz_info = layers[fldhaz[0].layer.id].label;
+            fldhaz_info = LAYERS[fldhaz[0].layer.id].label;
           }
           popup.setLngLat(center)
           .setHTML('Area: ' + Math.round(turf.area(feature.features[0])) + ' sqm<br>Landuse: ' + landuse_info + '<br>Flood vulnerability: ' + fldhaz_info);
@@ -210,24 +210,14 @@ export class Landing {
       }
     });
 
-    /*
-    class ResetMapView {
-      onAdd(map) {
-        this._map = map;
-        this._container = document.createElement('div');
-        this._container.className = 'mapboxgl-ctrl';
-        this._container.textContent = 'Hello, world';
-        return this._container;
-      }
+    self.map.on('mousemove', (e) => {
+      var features = self.map.queryRenderedFeatures(e.point, {layers: ['red_cross', 'buildings']});
+      self.map.getCanvas().style.cursor = features.length ? 'pointer' : '';
+    });
 
-      onRemove() {
-        this._container.parentNode.removeChild(this._container);
-        this._map = undefined;
-      }
-    }
-    self.map.addControl(new ResetMapView());
-  */
-
+    $(window).resize(() => {
+      this.map.resize();
+    });
   }
 
   //Show / hide toolbar
@@ -273,7 +263,7 @@ export class Landing {
     var self = this;
     var center = self.map.getCenter();
     var zoom = self.map.getZoom();
-    $('.setview').toggleClass('active');
+    $('.setView').toggleClass('active');
     if (view === '2d') {
       self.map.easeTo({
         center: center,
@@ -294,19 +284,19 @@ export class Landing {
   //Toggle layer visibility parameter & toggle buttons appearance
   toggleLayer(layer_id) {
     $('#toggle_'+layer_id).toggleClass('active');
-    if (layer_id !== 'FLDHVE' && layer_id !== 'FLDHAO' && layer_id !== 'FLDHAE' && layer_id !== 'FLDHAH' && layer_id !== 'FLDHX' && layer_id !== 'landuse') {
+    if (LAYERS[layer_id].render_opacity) {
+      var opacity = this.map.getPaintProperty(layer_id, 'fill-opacity');
+      if (opacity === 0) {
+        this.map.setPaintProperty(layer_id, 'fill-opacity', LAYERS[layer_id].render_opacity);
+      } else {
+        this.map.setPaintProperty(layer_id, 'fill-opacity', 0);
+      }
+    } else {
       var visibility = this.map.getLayoutProperty(layer_id, 'visibility');
       if (visibility === 'visible') {
         this.map.setLayoutProperty(layer_id, 'visibility', 'none');
       } else {
         this.map.setLayoutProperty(layer_id, 'visibility', 'visible');
-      }
-    } else {
-      var opacity = this.map.getPaintProperty(layer_id, 'fill-opacity');
-      if (opacity === 0) {
-        this.map.setPaintProperty(layer_id, 'fill-opacity', layers[layer_id].render_opacity);
-      } else {
-        this.map.setPaintProperty(layer_id, 'fill-opacity', 0);
       }
     }
   }
@@ -314,7 +304,35 @@ export class Landing {
   //Toggle toolbar layer groups
   toggleGroup(group_name) {
     $('#group_' + group_name).slideToggle("fast");
-    $('#toggle_' + group_name + ' > i').toggleClass("active");
+    $('#toggle_' + group_name + ' > i').toggleClass('active');
+  }
+
+  toggleAll(group_no) {
+    var self = this;
+    for (var i = 0; i < self.controlGroups[group_no].controls.length; i+=1) {
+      var layer_id = self.controlGroups[group_no].controls[i].id;
+      console.log(LAYERS[layer_id]);
+      if (LAYERS[layer_id].render_opacity) {
+        if ($('#toggle_all_' + group_no + ' > i.icon-check-empty').hasClass('active')) {
+          $('#toggle_' + layer_id).removeClass('active');
+          $('#toggle_' + layer_id).addClass('active');
+          this.map.setPaintProperty(layer_id, 'fill-opacity', LAYERS[layer_id].render_opacity);
+        } else {
+          $('#toggle_' + layer_id).removeClass('active');
+          this.map.setPaintProperty(layer_id, 'fill-opacity', 0);
+        }
+      } else {
+        if ($('#toggle_all_' + group_no + ' > i.icon-check-empty').hasClass('active')) {
+          $('#toggle_' + layer_id).removeClass('active');
+          $('#toggle_' + layer_id).addClass('active');
+          this.map.setLayoutProperty(layer_id, 'visibility', 'visible');
+        } else {
+          $('#toggle_' + layer_id).removeClass('active');
+          this.map.setLayoutProperty(layer_id, 'visibility', 'none');
+        }
+      }
+    }
+    $('#toggle_all_' + group_no + ' > i').toggleClass('active');
   }
 
   toggleTooltip(text) {

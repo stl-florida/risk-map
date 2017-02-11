@@ -1,6 +1,6 @@
 import lbcsCodes from '../../styles/lbcs';
 
-var layers = {
+var LAYERS = {
   //Flood Hazard Extents
   'FLDHVE': {
     group_no: '0',
@@ -101,7 +101,7 @@ var layers = {
   'water_bodies': {
     group_no: '1',
     label: 'Water bodies',
-    layer_id: 'S_WTR',
+    layer_id: 'water_bodies',
     type: 'fill',
     source: {
       name: 'mapbox',
@@ -116,7 +116,7 @@ var layers = {
     tooltip_text: 'Water Body',
     visibility: 'none'
   },
-  'salt_water_intrusion': {
+  'salt_water': {
     group_no: '1',
     label: 'Salt water intrusion',
     layer_id: 'salt_water',
@@ -194,7 +194,7 @@ var layers = {
   'buildings': {
     group_no: '3',
     label: '3D buildings',
-    layer_id: '3d_buildings',
+    layer_id: 'buildings',
     type: 'fill-extrusion',
     source: {
       name: null,
@@ -219,4 +219,4 @@ var layers = {
   }
 };
 
-module.exports = layers;
+module.exports = LAYERS;

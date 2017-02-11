@@ -3,12 +3,19 @@
   <require from="mapbox-gl/mapbox-gl.css"></require>
   <require from="mapbox-gl-draw/mapbox-gl-draw.css"></require>
   <div id="toolbar_wrapper">
+    <div class="sectionHeader">
+      <i class="icon-map"></i>&nbsp;Map
+    </div>
     <div id="mapview_toggle_wrapper">
-      <button class="setview active" click.delegate="toggleMapview('2d')">2D</button>
-      <button class="setview" click.delegate="toggleMapview('3d')">3D</button>
+      <button class="setView active" click.delegate="toggleMapview('2d')">2D</button>
+      <button class="setView" click.delegate="toggleMapview('3d')">3D</button>
+    </div>
+    <div class="sectionHeader">
+      <i class="icon-layers"></i>&nbsp;Layers
     </div>
     <div repeat.for="group of controlGroups" class="controlGroups">
-      <button id.bind="'toggle_'+group.id" class="groupToggle" click.delegate="toggleGroup(group.id)"><i class="icon-down-open active"></i><i class="icon-up-open"></i>&nbsp;&nbsp;${group.name}</button>
+      <button id.bind="'toggle_'+group.id" class="groupToggle" click.delegate="toggleGroup(group.id)"><i class="icon-right-open active"></i><i class="icon-down-open"></i>&nbsp;&nbsp;${group.name}</button>
+      <button id.bind="'toggle_all_'+group.group_no" class="toggleAll" click.delegate="toggleAll(group.group_no)"><i class="icon-check-empty active"></i><i class="icon-check"></i></button>
       <div id.bind="'group_'+group.id" class="groupWrapper">
         <button repeat.for="control of group.controls" id.bind="'toggle_'+control.id" class.bind="control.class" click.delegate="toggleLayer(control.id)" mouseover.delegate="toggleTooltip(control.tooltip)" mouseout.delegate="toggleTooltip(null)">${control.name}</button>
       </div>
@@ -23,6 +30,6 @@
   <img id="url_logo" src="assets/graphics/URL_logo.svg"></img>
   <div id="toolbar_control_wrapper" click.delegate="toggleToolbar()">
     <p class="buttonIcon active"><i class="icon-menu"></i></p>
-    <p class="buttonIcon"><i class="icon-left-open"></i></p>
+    <p class="buttonIcon"><i class="icon-angle-double-left"></i></p>
   </div>
 </template>
