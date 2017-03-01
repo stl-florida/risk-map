@@ -1,5 +1,5 @@
 export default {
-  debug: true,
-  testing: true,
-  root: '/'
+  debug: false,
+  testing: false,
+  root: '/dev-riskmap.fl/'
 };
