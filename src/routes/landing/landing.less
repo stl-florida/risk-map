@@ -10,35 +10,62 @@
   left: -@tool-bar-width;
   width: @tool-bar-width;
   height: 100%;
-  padding-top: 16px;
+  padding-top: 24px;
   background-color: @dark-gray;
   z-index: 1000;
   &.active {
     display: block;
   }
+  & .sectionHeader {
+    .label-medium(14px, fade(@snow-white, 80%));
+    margin: 0px;
+    padding: 0px 5px 5px 5px;
+    cursor: default;
+    border-bottom: 1px solid @water-blue;
+  }
   & #mapview_toggle_wrapper {
     width: 100%;
-    & .setview {
+    & .setView {
       width: 50%;
       float: left;
-      background-color: @dark-gray;
+      background-color: lighten(@dark-gray, 10%);
       border: none;
       outline: none;
+      cursor: pointer;
       .label-medium(12px, @snow-white);
       &.active {
         background-color: @water-blue;
       }
-      margin-bottom: 30px;
+      margin-bottom: 18px;
     }
   }
   & .controlGroups {
-    padding: 4px 0px;
     & .groupToggle {
-      width: 100%;
+      width: 90%;
+      height: 24px;
       background-color: @dark-gray;
       border: none;
       border-bottom: 1px solid @water-blue;
       .label-medium(12px, @water-blue);
+      text-align: left;
+      cursor: pointer;
+      outline: none;
+      float: left;
+      & i {
+        display: none;
+        &.active {
+          display: inline;
+        }
+      }
+    }
+    & .toggleAll {
+      width: 10%;
+      height: 24px;
+      background-color: @dark-gray;
+      border: none;
+      border-bottom: 1px solid @water-blue;
+      font-size: 12px;
+      color: @snow-white;
       text-align: left;
       cursor: pointer;
       outline: none;
@@ -51,14 +78,13 @@
     }
     & .groupWrapper {
       display: none;
-      position: relative;
-      padding: 0px 0px 1px 0px;
+      padding: 0px;
       border-bottom: 1px solid @water-blue;
       & .layerControls {
         width: 100%;
         margin: 0px;
         padding-left: 28px;
-        background-color: @dark-gray;
+        background-color: lighten(@dark-gray, 10%);
         border: none;
         .label-light(12px, @snow-white);
         text-align: left;
@@ -75,7 +101,6 @@
   & #tooltip_wrapper {
     width: 100%;
     & p {
-      padding-top: 4px;
       padding-left: 28px;
       padding-right: 8px;
       margin: 0;
