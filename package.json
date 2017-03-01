@@ -6,6 +6,10 @@
     "type": "git",
     "url": "git+https://github.com/stl-florida/risk-map"
   },
+  "scripts": {
+    "start": "au run --env dev --watch",
+    "build": "rm -rf scripts/* && au build --env prod",
+  },
   "license": "MIT",
   "dependencies": {
     "aurelia-animator-css": "^1.0.0",
