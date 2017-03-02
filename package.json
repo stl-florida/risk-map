@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "au run --env dev --watch",
-    "build": "rm -rf scripts/* && rm -rf src/environment.js && au build --env stage"
+    "stage": "rm -rf scripts/* && rm -rf src/environment.js && au build --env stage"
   },
   "license": "MIT",
   "dependencies": {
