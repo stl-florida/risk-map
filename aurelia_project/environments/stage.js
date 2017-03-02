@@ -1,4 +1,5 @@
 export default {
-  debug: true,
-  testing: false
+  debug: false,
+  testing: false,
+  root: '/'
 };
