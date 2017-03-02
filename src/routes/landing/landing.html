@@ -7,28 +7,28 @@
       <i class="icon-map"></i>&nbsp;Map
     </div>
     <div id="mapview_toggle_wrapper">
-      <button class="setView active" click.delegate="toggleMapview('2d')">2D</button>
-      <button class="setView" click.delegate="toggleMapview('3d')">3D</button>
+      <button class="setView active" click.delegate="utility.toggleMapview('2d')">2D</button>
+      <button class="setView" click.delegate="utility.toggleMapview('3d')">3D</button>
     </div>
     <div class="sectionHeader">
       <i class="icon-layers"></i>&nbsp;Layers
     </div>
-    <div repeat.for="group of controlGroups" class="controlGroups">
-      <button id.bind="'toggle_'+group.id" class="groupToggle" click.delegate="toggleGroup(group.id)"><i class="icon-right-open active"></i><i class="icon-down-open"></i>&nbsp;&nbsp;${group.name}</button>
-      <button id.bind="'toggle_all_'+group.group_no" class="toggleAll" click.delegate="toggleAll(group.group_no)"><i class="icon-check-empty active"></i><i class="icon-check"></i></button>
+    <div repeat.for="group of utility.controlGroups" class="controlGroups">
+      <button id.bind="'toggle_'+group.id" class="groupToggle" click.delegate="utility.toggleGroup(group.id)"><i class="icon-right-open active"></i><i class="icon-down-open"></i>&nbsp;&nbsp;${group.name}</button>
+      <button id.bind="'toggle_all_'+group.group_no" class="toggleAll" click.delegate="utility.toggleAll(group.group_no)"><i class="icon-check-empty active"></i><i class="icon-check"></i></button>
       <div id.bind="'group_'+group.id" class="groupWrapper">
-        <button repeat.for="control of group.controls" id.bind="'toggle_'+control.id" class.bind="control.class" click.delegate="toggleLayer(control.id)" mouseover.delegate="toggleTooltip(control.tooltip)" mouseout.delegate="toggleTooltip(null)">${control.name}</button>
+        <button repeat.for="control of group.controls" id.bind="'toggle_'+control.id" class.bind="control.class" click.delegate="utility.toggleLayer(control.id)" mouseover.delegate="utility.toggleTooltip(control.tooltip)" mouseout.delegate="utility.toggleTooltip(null)">${control.name}</button>
       </div>
     </div>
-    <div id="tooltip_wrapper" if.bind="tooltip_text">
+    <div id="tooltip_wrapper" if.bind="utility.tooltip_text">
       <p id="tooltip_header">Layer information</p>
-      <p innerhtml.bind="tooltip_text"></p>
+      <p innerhtml.bind="utility.tooltip_text"></p>
     </div>
   </div>
   <div id="map_wrapper">
   </div>
   <img id="url_logo" src="assets/graphics/URL_logo.svg"></img>
-  <div id="toolbar_control_wrapper" click.delegate="toggleToolbar()">
+  <div id="toolbar_control_wrapper" click.delegate="utility.toggleToolbar()">
     <p class="buttonIcon active"><i class="icon-menu"></i></p>
     <p class="buttonIcon"><i class="icon-angle-double-left"></i></p>
   </div>
