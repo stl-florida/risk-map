@@ -1,4 +1,7 @@
 import LAYERS from './layers';
+import CONFIG from '../../config';
+import {HttpClient} from 'aurelia-http-client';
+//import {HttpClient, json} from 'aurelia-fetch-client';
 
 export class LandingUtility {
   constructor() {
@@ -102,6 +105,33 @@ export class LandingUtility {
     self.controlGroups.push({group_no: '3', name: 'Physical Infrastructure', id: 'phy_inf', controls: []});
     self.addLayer(LAYERS.red_cross);
     self.addLayer(LAYERS.buildings);
+  }
+
+  pointQuery(end_point, data, content_type) {
+    let client = new HttpClient();
+    return new Promise((resolve, reject) => {
+      client.createRequest(end_point)
+        .asPost()
+        .withBaseUrl(CONFIG.data_server)
+        .withHeader('Content-Type', content_type)
+        .withContent(data)
+        .withInterceptor({
+          request(msg) {
+            console.log(msg);
+          },
+          requestError(err) {
+            reject(err);
+          },
+          response(msg) {
+            var res = JSON.parse(msg.response);
+            resolve({fld_hzd: res[0].fld_zone, lnd_use: res[1].land_use});
+          },
+          responseError(err) {
+            reject(err);
+          }
+        })
+        .send();
+    });
   }
 
   showPopup(e, popup) {
@@ -267,17 +297,37 @@ export class LandingUtility {
       var fldhaz_info = 'Undefined';
       if (feature.features[0].geometry.type === 'Point') {
         center = feature.features[0].geometry.coordinates;
+        var latlng_obj = {
+          lat: center[1],
+          long: center[0]
+        };
+        self.pointQuery('point', latlng_obj, 'application/json')
+        .then((popupContent) => {
+          popup.setLngLat(center)
+          .setHTML('Landuse: ' + popupContent.lnd_use + '<br>Flood vulnerability: Hazard ' + popupContent.fld_hzd);
+        }).catch((err) => {
+          popup.setLngLat(center)
+          .setHTML('Server Error');
+          console.log(err);
+        });
+
+        //Mapbox query rendered features - front-end analysis
+        /*
         landuse = self.map.queryRenderedFeatures(self.map.project(center), {layers: ['landuse']});
         fldhaz = self.map.queryRenderedFeatures(self.map.project(center), {layers: ['FLDHVE', 'FLDHAO', 'FLDHAE', 'FLDHAH', 'FLDHX']});
         self.map.flyTo({center: center});
+
         if (landuse.length) {
           landuse_info = landuse[0].properties.LAND_USE;
         }
         if (fldhaz.length) {
           fldhaz_info = LAYERS[fldhaz[0].layer.id].label;
         }
+
         popup.setLngLat(center)
              .setHTML('Landuse: ' + landuse_info + '<br>Flood vulnerability: ' + fldhaz_info);
+        */
+
       } else if (feature.features[0].geometry.type === 'Polygon') {
         center = turf.centroid(feature.features[0]).geometry.coordinates;
         landuse = self.map.queryRenderedFeatures(self.map.project(center), {layers: ['landuse']});

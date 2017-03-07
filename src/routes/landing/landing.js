@@ -1,7 +1,6 @@
 import {inject} from 'aurelia-framework';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from 'mapbox-gl-draw';
-import {HttpClient} from 'aurelia-http-client';
 import * as topojson from 'topojson-client';
 import {LandingUtility} from './landing-utility';
 import CONFIG from '../../config';
