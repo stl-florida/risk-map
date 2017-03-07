@@ -301,7 +301,7 @@ export class LandingUtility {
           lat: center[1],
           long: center[0]
         };
-        self.pointQuery('point', latlng_obj, 'application/json')
+        self.pointQuery('/point', latlng_obj, 'application/json')
         .then((popupContent) => {
           popup.setLngLat(center)
           .setHTML('Landuse: ' + popupContent.lnd_use + '<br>Flood vulnerability: Hazard ' + popupContent.fld_hzd);
