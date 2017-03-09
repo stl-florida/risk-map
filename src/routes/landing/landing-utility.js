@@ -7,6 +7,7 @@ export class LandingUtility {
   constructor() {
     this.map = null;
     this.controlGroups = [];
+    this.mapView = '2d'; //TODO: DELETE
   }
 
   setSource(name, type, data) {
@@ -124,7 +125,7 @@ export class LandingUtility {
           },
           response(msg) {
             var res = JSON.parse(msg.response);
-            resolve({fld_hzd: res[0].fld_zone, lnd_use: res[1].land_use});
+            resolve(res);
           },
           responseError(err) {
             reject(err);
@@ -218,6 +219,8 @@ export class LandingUtility {
         bearing: 0,
         pitch: 0
       });
+      //TEMPORARY switch between query types
+      self.mapView = '2d';
     } else if (view === '3d') {
       self.map.easeTo({
         center: center,
@@ -225,6 +228,8 @@ export class LandingUtility {
         bearing: -30,
         pitch: 60
       });
+      //TEMPORARY switch between query types
+      self.mapView = '3d';
     }
   }
 
@@ -301,15 +306,29 @@ export class LandingUtility {
           lat: center[1],
           long: center[0]
         };
-        self.pointQuery('/point', latlng_obj, 'application/json')
-        .then((popupContent) => {
-          popup.setLngLat(center)
-          .setHTML('Landuse: ' + popupContent.lnd_use + '<br>Flood vulnerability: Hazard ' + popupContent.fld_hzd);
-        }).catch((err) => {
-          popup.setLngLat(center)
-          .setHTML('Server Error');
-          console.log(err);
-        });
+
+        if (self.mapView === '2d') {
+          popup.setLngLat(center).setHTML('Loading...');
+          self.pointQuery('/point/zone', latlng_obj, 'application/json')
+          .then(res => {
+            var popupContent = {fld_hzd: res[0].fld_zone, lnd_use: res[1].land_use};
+            popup.setHTML('Landuse: ' + popupContent.lnd_use + '<br>Flood vulnerability: Hazard ' + popupContent.fld_hzd);
+          }).catch((err) => {
+            popup.setHTML('Out of bounds');
+            console.log(err);
+          });
+        } else if (self.mapView === '3d') {
+          popup.setLngLat(center).setHTML('Loading...');
+          self.pointQuery('/point/elev', latlng_obj, 'application/json')
+          .then(res => {
+            var popupContent = {elev: res[0].elev};
+            //popup.setLngLat(center)
+            popup.setHTML('Elevation: ' + popupContent.elev + ' m');
+          }).catch((err) => {
+            popup.setHTML('Out of bounds');
+            console.log(err);
+          });
+        }
 
         //Mapbox query rendered features - front-end analysis
         /*
