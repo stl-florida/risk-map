@@ -1,6 +1,7 @@
 import LAYERS from './layers';
 import CONFIG from '../../config';
 import {HttpClient} from 'aurelia-http-client';
+import * as topojson from 'topojson-client';
 //import {HttpClient, json} from 'aurelia-fetch-client';
 
 export class LandingUtility {
@@ -23,7 +24,48 @@ export class LandingUtility {
     }
   }
 
-  addLayer(properties) {
+  getData(end_point) {
+    let client = new HttpClient();
+    return new Promise((resolve, reject) => {
+      client.createRequest(end_point)
+        .asGet()
+        .withBaseUrl(CONFIG.data_server)
+        .withInterceptor({
+          request(msg) {
+            console.log(msg);
+          },
+          requestError(err) {
+            reject(err);
+          },
+          response(msg) {
+            // Get topojson, return geojson
+            var res = JSON.parse(msg.response);
+            // console.log(res);
+            resolve(topojson.feature(res, res.objects.output));
+          },
+          responseError(err) {
+            reject(err);
+          }
+        })
+        .send();
+    });
+  }
+
+  resolveData(end_point, properties) {
+    var self = this;
+    var new_properties = properties;
+    return new Promise((resolve, reject) => {
+      self.getData(end_point)
+      .then(geojson_data => {
+        new_properties.source.data = geojson_data;
+      })
+      .then(() => {
+        resolve(new_properties);
+      });
+    });
+  }
+
+  applySettings(properties) {
     var self = this;
     if (properties.render_opacity) {
       //Always on base layers (flood hazard & landuse)
@@ -81,31 +123,47 @@ export class LandingUtility {
     }
   }
 
+  addLayer(end_point, layer_properties) {
+    var self = this;
+    if (end_point !== null) {
+      self.resolveData(end_point, layer_properties)
+      .then(properties => {
+        self.applySettings(properties);
+      });
+    } else {
+      self.applySettings(layer_properties);
+    }
+  }
+
   loadLayers() {
     var self = this;
     // Push object to self.controlGroups only if atleast one layer is toggleable
     //Control group '0'
     self.controlGroups.push({group_no: '0', name: 'Flood Hazard Extents', id: 'fld_haz_ext', controls: []});
-    self.addLayer(LAYERS.FLDHVE);
-    self.addLayer(LAYERS.FLDHAO);
-    self.addLayer(LAYERS.FLDHAE);
-    self.addLayer(LAYERS.FLDHAH);
-    self.addLayer(LAYERS.FLDHX);
+    self.addLayer(null, LAYERS.FLDHVE);
+    self.addLayer(null, LAYERS.FLDHAO);
+    self.addLayer(null, LAYERS.FLDHAE);
+    self.addLayer(null, LAYERS.FLDHAH);
+    self.addLayer(null, LAYERS.FLDHX);
 
     //Control group '1'
     self.controlGroups.push({group_no: '1', name: 'Water Infrastructure', id: 'wtr_inf', controls: []});
-    self.addLayer(LAYERS.water_bodies);
-    self.addLayer(LAYERS.salt_water);
+    self.addLayer(null, LAYERS.water_bodies);
+    self.addLayer(null, LAYERS.salt_water);
 
     //Control group '2'
     self.controlGroups.push({group_no: '2', name: 'City Data', id: 'city_data', controls: []});
-    self.addLayer(LAYERS.landuse);
-    self.addLayer(LAYERS.city_boundaries);
+    self.addLayer(null, LAYERS.landuse);
+    self.addLayer(null, LAYERS.city_boundaries);
 
     //Control group '3'
     self.controlGroups.push({group_no: '3', name: 'Physical Infrastructure', id: 'phy_inf', controls: []});
-    self.addLayer(LAYERS.red_cross);
-    self.addLayer(LAYERS.buildings);
+    self.addLayer(null, LAYERS.red_cross);
+    self.addLayer(null, LAYERS.buildings);
+
+    //Control group '4'
+    self.controlGroups.push({group_no: '4', name: 'Local db test', id: 'lcl_db', controls: []});
+    self.addLayer('/slosh', LAYERS.storm_surge);
   }
 
   pointQuery(end_point, data, content_type) {
@@ -125,6 +183,34 @@ export class LandingUtility {
           },
           response(msg) {
             var res = JSON.parse(msg.response);
+            resolve(res);
+          },
+          responseError(err) {
+            reject(err);
+          }
+        })
+        .send();
+    });
+  }
+
+  areaQuery(end_point, data, content_type) {
+    let client = new HttpClient();
+    return new Promise((resolve, reject) => {
+      client.createRequest(end_point)
+        .asPost()
+        .withBaseUrl(CONFIG.data_server)
+        .withHeader('Content-Type', content_type)
+        .withContent(data)
+        .withInterceptor({
+          request(msg) {
+            console.log(msg);
+          },
+          requestError(err) {
+            reject(err);
+          },
+          response(msg) {
+            var res = JSON.parse(msg.response);
+            console.log(res);
             resolve(res);
           },
           responseError(err) {
@@ -348,10 +434,60 @@ export class LandingUtility {
         */
 
       } else if (feature.features[0].geometry.type === 'Polygon') {
+
         center = turf.centroid(feature.features[0]).geometry.coordinates;
+        self.map.flyTo({center: center});
+        var poly_coords = feature.features[0].geometry.coordinates[0];
+        var line_string = 'LINESTRING(';
+        // loop works with closed polygon, when user hits 'RETURN' after 3 or more points
+        // check 'key' for open poly? catch
+        for (let i in poly_coords) {
+          if (i < poly_coords.length - 1) {
+            line_string = line_string + poly_coords[i][0] + ' ' + poly_coords[i][1] + ', ';
+          } else if (i < poly_coords.length) {
+            line_string = line_string + poly_coords[i][0] + ' ' + poly_coords[i][1] + ')';
+          }
+        }
+        self.areaQuery('/area/age', {coords: line_string}, 'application/json')
+        .then(topo_data => {
+          var geo_data = topojson.feature(topo_data, topo_data.objects.output);
+          self.map.addLayer({
+            'id': 'lots',
+            'type': 'fill',
+            'source': {
+              'type': 'geojson',
+              'data': geo_data
+            },
+            'source-layer': '',
+            'layout': {
+              'visibility': 'visible'
+            },
+            'paint': {
+              'fill-color': {
+                'property': 'year_built',
+                'type': 'exponential',
+                'stops': [
+                  [1900, '#49321a'],
+                  [1945, '#b78916'],
+                  [2000, '#8ad35f']
+                ]
+              },
+              'fill-opacity': {
+                'property': 'year_built',
+                'type': 'interval',
+                'stops': [
+                  [0, 0],
+                  [1, 0.6]
+                ]
+              }
+            }
+          });
+        });
+
+        /*
         landuse = self.map.queryRenderedFeatures(self.map.project(center), {layers: ['landuse']});
         fldhaz = self.map.queryRenderedFeatures(self.map.project(center), {layers: ['FLDHVE', 'FLDHAO', 'FLDHAE', 'FLDHAH', 'FLDHX']});
-        self.map.flyTo({center: center});
+
         if (landuse.length) {
           landuse_info = landuse[0].properties.LAND_USE;
         }
@@ -360,8 +496,9 @@ export class LandingUtility {
         }
         popup.setLngLat(center)
              .setHTML('Area: ' + Math.round(turf.area(feature.features[0])) + ' sqm<br>Landuse: ' + landuse_info + '<br>Flood vulnerability: ' + fldhaz_info);
+        */
       }
-      popup.addTo(self.map);
+      //popup.addTo(self.map);
     }
   }
 }

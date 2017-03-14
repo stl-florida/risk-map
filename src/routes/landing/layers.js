@@ -1,4 +1,5 @@
 import lbcsCodes from '../../styles/lbcs';
+import CONFIG from '../../config';
 
 var LAYERS = {
   //Flood Hazard Extents
@@ -132,7 +133,7 @@ var LAYERS = {
       'line-width': 3
     },
     tooltip_text: 'Extent of salt-water intrusion into fresh water aquifers that can lead to cantamination of drinking water sources.',
-    visibility: 'visible'
+    visibility: 'none'
   },
   //City data
   'landuse': {
@@ -215,6 +216,34 @@ var LAYERS = {
       'fill-extrusion-opacity': 0.8
     },
     tooltip_text: 'Building footprints and 3d volumes',
+    visibility: 'none'
+  },
+  'storm_surge': {
+    group_no: '4',
+    label: 'Storm surge heights',
+    layer_id: 'storm_surge',
+    type: 'fill',
+    source: {
+      name: 'geojson_url',
+      type: 'geojson',
+      data: null,
+      layer: '',
+    },
+    paint: {
+      'fill-color': {
+        'property': 'cat',
+        'type': 'categorical',
+        'stops': [
+          ['1', '#c1272d'],
+          ['2', '#cd5257'],
+          ['3', '#d97d81'],
+          ['4', '#e6a8ab'],
+          ['5', '#f2d3d5']
+        ]
+      },
+      'fill-opacity': 0.7
+    },
+    tooltip_text: 'Storm surge heights based on SLOSH model',
     visibility: 'none'
   }
 };
