@@ -20,6 +20,12 @@
         <button repeat.for="control of group.controls" id.bind="'toggle_'+control.id" class.bind="control.class" click.delegate="utility.toggleLayer(control.id)" mouseover.delegate="utility.toggleTooltip(control.tooltip)" mouseout.delegate="utility.toggleTooltip(null)">${control.name}</button>
       </div>
     </div>
+    <div id="query_selector">
+      <label repeat.for="query of utility.area_query">
+        <input type="radio" model.bind="query" checked.bind="utility.sel_query_setting"/>
+        ${query}
+      </label>
+    </div>
     <div id="tooltip_wrapper" if.bind="utility.tooltip_text">
       <p id="tooltip_header">Layer information</p>
       <p innerhtml.bind="utility.tooltip_text"></p>

@@ -141,6 +141,11 @@
             "env": "dev"
           },
           {
+            "name": "chart",
+            "path": "../node_modules/chart.js/dist",
+            "main": "Chart.bundle"
+          },
+          {
             "name": "jquery",
             "path": "../node_modules/jquery/dist",
             "main": "jquery"
