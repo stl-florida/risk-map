@@ -119,6 +119,32 @@
       }
     }
   }
+  & #directions_selector {
+    margin-top: 12px;
+    width: 100%;
+    & p {
+      padding-left: 28px;
+      margin: 0;
+      .label-medium(12px, @water-blue);
+    }
+    & .dirBtn {
+      width: 50%;
+      float: left;
+      background-color: lighten(@dark-gray, 10%);
+      border: none;
+      outline: none;
+      cursor: pointer;
+      .label-light(12px, @snow-white);
+      &.active {
+        background-color: @water-blue;
+      }
+      &:disabled {
+        background-color: @dark-gray;
+        .label-light(12px, fade(@snow-white, 40%));
+        cursor: auto;
+      }
+    }
+  }
 }
 
 #map_wrapper {

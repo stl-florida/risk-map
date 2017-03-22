@@ -248,7 +248,7 @@ var LAYERS = {
       'fill-color': lbcsCodes,
       'fill-opacity': 0
     },
-    render_opacity: 0.8, //Use for base layers which are required to remain visible
+    render_opacity: 0.5, //Use for base layers which are required to remain visible
     tooltip_text: 'The data set indicates the Broward County Land Use Plan designation for all parcels in Broward County.(updated September 27, 2016.)',
     visibility: 'visible'
   },
@@ -372,21 +372,30 @@ var LAYERS = {
     visibility: 'visible'
   },
   'contours': {
-    group_no: '4',
+    group_no: '1',
     label: 'Contours',
-    layer_id: 'contour',
+    layer_id: 'contours',
     type: 'line',
     source: {
-      name: 'mapbox_global',
+      name: 'mapbox_user',
       type: 'vector',
-      data: 'mapbox://mapbox.mapbox-terrain-v2',
-      layer: 'contour',
+      data: '1uj351nf',
+      layer: 'contours',
     },
-    paint: {
-      "line-color": "#ff69b4",
-      "line-width": 1
+    'paint': {
+      'line-color': {
+        'property': 'elev',
+        'type': 'exponential',
+        'stops': [
+          [-4, '#28211d'],
+          [4, '#563b1b'],
+          [12, '#638251'],
+          [20, '#cde29f']
+        ]
+      },
+      'line-width': 0.25
     },
-    tooltip_text: 'Contour lines',
+    tooltip_text: 'Contour lines at 1 ft interval',
     visibility: 'none'
   },
   'hillshade': {

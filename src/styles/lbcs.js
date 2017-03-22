@@ -62,8 +62,8 @@ var lbcsCodes = {
     ['Recreation & Open Space', '#90ee90'],
     ['Recreation and Open Space', '#90ee90'],
 
-    //Water
-    ['Water', '#1a1a1a']
+    //Water (#1a1a1a for mapbox: dark style)
+    ['Water', '#cad2d3']
   ]
 };
 

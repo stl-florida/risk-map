@@ -11,6 +11,20 @@ import CONFIG from '../../config';
 export class Landing {
   constructor(util) {
     this.utility = util;
+    this.picked_source = null;
+  }
+
+  activateDirections(pick, status) {
+    if (status === 'active') {
+      if (pick === 'source') {
+        this.pick_source = true;
+        $('#dir_source').addClass('active');
+      } else if (pick === 'destination') {
+        this.pick_destination = true;
+        $('#dir_source').removeClass('active');
+        $('#dir_destination').addClass('active');
+      }
+    }
   }
 
   attached() {
@@ -37,6 +51,17 @@ export class Landing {
     });
     self.utility.map.on('click', (e) => {
       self.utility.showPopup(e, popup);
+      if (self.pick_source) {
+        self.picked_source = e.lngLat;
+      }
+      if (self.pick_source && self.pick_destination) {
+        self.pick_source = false;
+        self.pick_destination = false;
+        var coords = {source: self.picked_source, destination: e.lngLat};
+        self.utility.addDirectionsLayer(coords);
+        self.picked_source = null;
+        $('#dir_source').removeClass('active');
+      }
     });
 
     var draw = new MapboxDraw({
@@ -51,6 +76,10 @@ export class Landing {
 
     self.utility.map.on('draw.delete', () => {
       popup.remove();
+    });
+
+    self.utility.map.on('zoom', (e) => {
+      self.utility.updateSections(e);
     });
 
     self.utility.map.on('draw.selectionchange', feature => {

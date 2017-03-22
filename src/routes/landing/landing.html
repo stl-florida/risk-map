@@ -26,6 +26,11 @@
         ${query}
       </label>
     </div>
+    <div id="directions_selector">
+      <p id="directions_header">Find route to nearest shelter</p>
+      <button id="dir_source" class="dirBtn" disabled.bind="picked_source" click.delegate="activateDirections('source', 'active')">Your location</button>
+      <button id="dir_destination" class="dirBtn" disabled.bind="!picked_source" click.delegate="activateDirections('destination', 'active')">Nearest red cross shelter</button>
+    </div>
     <div id="tooltip_wrapper" if.bind="utility.tooltip_text">
       <p id="tooltip_header">Layer information</p>
       <p innerhtml.bind="utility.tooltip_text"></p>

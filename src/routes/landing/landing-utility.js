@@ -10,8 +10,9 @@ export class LandingUtility {
     this.map = null;
     this.controlGroups = [];
     this.mapView = '2d'; //TODO: DELETE
-    this.area_query = ['age', 'hazard', 'storage', 'contours', 'elevation'];
+    this.area_query = ['age', 'hazard', 'storage', 'elevation'];
     this.sel_query_setting = 'age';
+    this.isSectionPaneOpen = false;
   }
 
   getWMS(type, params) {
@@ -87,6 +88,36 @@ export class LandingUtility {
             // Get topojson, return geojson
             var res = JSON.parse(msg.response);
             resolve(topojson.feature(res, res.objects.output));
+          },
+          responseError(err) {
+            reject(err);
+          }
+        })
+        .send();
+    });
+  }
+
+  // requests need to be made over https, localhost (http) not supported
+  // push relevant code to master to check via github.pages
+  // further reference: https://www.mapbox.com/api-documentation/?language=JavaScript#directions
+  getRouting(profile, coords) {
+    let client = new HttpClient();
+    return new Promise((resolve, reject) => {
+      client.createRequest(profile + '/' + coords + '?access_token=' + CONFIG.map_token)
+        .asGet()
+        .withBaseUrl('https://api.mapbox.com/directions/v5/')
+        .withHeader('Content-Type', 'application/json')
+        .withInterceptor({
+          request(msg) {
+            console.log(msg);
+          },
+          requestError(err) {
+            reject(err);
+          },
+          response(msg) {
+            //var res = JSON.parse(msg.response);
+            console.log(res);
+            //resolve(topojson.feature(res, res.objects.output));
           },
           responseError(err) {
             reject(err);
@@ -233,6 +264,7 @@ export class LandingUtility {
     self.controlGroups.push({group_no: '1', name: 'Water Infrastructure', id: 'wtr_inf', controls: []});
     self.addLayer(null, LAYERS.water_bodies);
     self.addLayer(null, LAYERS.salt_water);
+    self.addLayer(null, LAYERS.contours);
     //self.addLayer('/slosh', LAYERS.storm_surge);
 
     //Control group '2'
@@ -249,7 +281,6 @@ export class LandingUtility {
     self.controlGroups.push({group_no: '4', name: 'Realtime water monitoring', id: 'liv_usgs', controls: []});
     self.addLayer(null, LAYERS.gw_wells);
     self.addLayer(null, LAYERS.gauges);
-    //self.addLayer(null, LAYERS.contours);
     //self.addLayer(null, LAYERS.hillshade);
   }
 
@@ -413,8 +444,13 @@ export class LandingUtility {
     });
   }
 
+  //TODO: Draggable slider, return long values, update section min, max (xAxes.ticks)
+  //visualize section line - snapshot window + update geojson of section line, add properties
+  //to vary thickness of section line segments
+  //https://www.mapbox.com/mapbox-gl-js/example/drag-a-point/
   drawSections(data) {
     var self = this;
+    self.isSectionPaneOpen = true;
     $('#section_wrapper').empty();
     $('#section_wrapper').html('<canvas id="cross_sections"></canvas>');
     var sections_ctx = $('#cross_sections').get(0).getContext('2d');
@@ -434,7 +470,7 @@ export class LandingUtility {
     for (let row of data.surface.rows) {
       data_surface.push({x: row.x_surface, y: row.z_surface});
     }
-    var cross_sections_chart = new Chart(sections_ctx, {
+    self.cross_sections_chart = new Chart(sections_ctx, {
       type: 'line',
       data: {
         datasets : [
@@ -959,41 +995,6 @@ export class LandingUtility {
               }
             });
           });
-        } else if (self.sel_query_setting === 'contours') {
-          if (self.map.getLayer('contours')) {
-            self.map.removeLayer('contours');
-            self.map.removeSource('contours');
-          }
-          self.areaQuery('/area/contours', {coords: line_string}, 'application/json')
-          .then(topo_data => {
-            var geo_data = topojson.feature(topo_data, topo_data.objects.output);
-            self.map.addLayer({
-              'id': 'contours',
-              'type': 'line',
-              'source': {
-                'type': 'geojson',
-                'data': geo_data
-              },
-              'source-layer': '',
-              'layout': {
-                'visibility': 'visible'
-              },
-              'paint': {
-                'line-color': {
-                  'property': 'elev',
-                  'type': 'exponential',
-                  'stops': [
-                    [-4, '#28211d'],
-                    [4, '#563b1b'],
-                    [12, '#638251'],
-                    [20, '#cde29f']
-
-                  ]
-                },
-                'line-width': 0.25
-              }
-            });
-          });
         } else if (self.sel_query_setting === 'elevation') {
           if (self.map.getLayer('elevation')) {
             self.map.removeLayer('elevation');
@@ -1054,6 +1055,31 @@ export class LandingUtility {
         */
       }
       //popup.addTo(self.map);
+    }
+  }
+
+  addDirectionsLayer(coords) {
+    var self = this;
+    var formatted_coords = coords.source.lng + '%2C' + coords.source.lat + '%3B' + coords.destination.lng + '%2C' + coords.destination.lat + '.json';
+    self.getRouting('mapbox/driving', formatted_coords)
+    .then(res => {
+
+    });
+  }
+
+  updateSections(e) {
+    var self = this;
+    if (self.isSectionPaneOpen) {
+      var left_offset = $('#map_wrapper').offset().left,
+          section_yaxis_offset = 40,
+          left_query = left_offset + section_yaxis_offset,
+          right_query = $(window).width() - left_offset,
+          left_coord = self.map.unproject([left_query, 100]),
+          right_coord = self.map.unproject([right_query, 100]);
+      //console.log(self.cross_sections_chart);
+      self.cross_sections_chart.options.scales.xAxes[0].ticks.min = left_coord.lng;
+      self.cross_sections_chart.options.scales.xAxes[0].ticks.max = right_coord.lng;
+      self.cross_sections_chart.update();
     }
   }
 }
