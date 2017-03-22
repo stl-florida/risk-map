@@ -10,7 +10,7 @@ export class LandingUtility {
     this.map = null;
     this.controlGroups = [];
     this.mapView = '2d'; //TODO: DELETE
-    this.area_query = ['age', 'hazard', 'storage', 'retention'];
+    this.area_query = ['age', 'hazard', 'storage', 'contours', 'elevation'];
     this.sel_query_setting = 'age';
   }
 
@@ -86,7 +86,6 @@ export class LandingUtility {
           response(msg) {
             // Get topojson, return geojson
             var res = JSON.parse(msg.response);
-            // console.log(res);
             resolve(topojson.feature(res, res.objects.output));
           },
           responseError(err) {
@@ -234,6 +233,7 @@ export class LandingUtility {
     self.controlGroups.push({group_no: '1', name: 'Water Infrastructure', id: 'wtr_inf', controls: []});
     self.addLayer(null, LAYERS.water_bodies);
     self.addLayer(null, LAYERS.salt_water);
+    //self.addLayer('/slosh', LAYERS.storm_surge);
 
     //Control group '2'
     self.controlGroups.push({group_no: '2', name: 'City Data', id: 'city_data', controls: []});
@@ -246,9 +246,9 @@ export class LandingUtility {
     self.addLayer(null, LAYERS.buildings);
 
     //Control group '4'
-    self.controlGroups.push({group_no: '4', name: 'Local db test', id: 'lcl_db', controls: []});
-    self.addLayer('/slosh', LAYERS.storm_surge);
+    self.controlGroups.push({group_no: '4', name: 'Realtime water monitoring', id: 'liv_usgs', controls: []});
     self.addLayer(null, LAYERS.gw_wells);
+    self.addLayer(null, LAYERS.gauges);
     //self.addLayer(null, LAYERS.contours);
     //self.addLayer(null, LAYERS.hillshade);
   }
@@ -297,7 +297,7 @@ export class LandingUtility {
           },
           response(msg) {
             var res = JSON.parse(msg.response);
-            console.log(res);
+            //console.log(res);
             resolve(res);
           },
           responseError(err) {
@@ -321,7 +321,9 @@ export class LandingUtility {
         lineTension: 0,
         spanGaps: true,
         backgroundColor: "rgba(151,187,205,0.2)",
+        borderWidth: 1,
         borderColor: "rgba(151,187,205,1)",
+        borderJoinStyle: "round",
         pointRadius: 0,
         data: []
       }]
@@ -329,7 +331,13 @@ export class LandingUtility {
     self.getWMS('usgs_gw_monitoring', wms_map)
     .then(data => {
       var chart_ctx = $('#chart').get(0).getContext('2d');
-
+      var county_code;
+      for (let [key, value] of wms_map) {
+        if (key.indexOf('cb_') === 0) {
+          county_code = key.split('_')[1];
+          break;
+        }
+      }
       for (let entry in data) {
         if (data[entry].datetime) {
           chart_data.labels.push(data[entry].datetime);
@@ -340,7 +348,7 @@ export class LandingUtility {
               break;
             }
           }
-          chart_data.datasets[0].data.push(data[entry][ts + '_62610']); //code for broward
+          chart_data.datasets[0].data.push(data[entry][ts + '_' + county_code]);
         }
       }
       //console.log(chart_data);
@@ -358,7 +366,8 @@ export class LandingUtility {
           },
           bezierCurve: false,
           scales: {
-            yAxes: [{
+            //y axis settings will work only if alt_va, well_depth_va properties are included, make parametric
+            /*yAxes: [{
               scaleLabel: {
                 labelString: 'm',
               },
@@ -369,7 +378,7 @@ export class LandingUtility {
                 max: well.alt_va,
                 min: well.alt_va - well.well_depth_va
               }
-            }],
+            }],*/
             xAxes: [{
               gridLines: {
                 drawOnChartArea: false,
@@ -404,12 +413,139 @@ export class LandingUtility {
     });
   }
 
+  drawSections(data) {
+    var self = this;
+    $('#section_wrapper').empty();
+    $('#section_wrapper').html('<canvas id="cross_sections"></canvas>');
+    var sections_ctx = $('#cross_sections').get(0).getContext('2d');
+    sections_ctx.canvas.width = $('#map_wrapper').width();
+    sections_ctx.canvas.height = ($('#map_wrapper').height() / 2);
+    var data_base = [];
+    var data_future = [];
+    var data_surface = [];
+    var xMin = -80.46; //data.surface.rows[0].x_surface;
+    var xMax = -80.075; //data.surface.rows[data.surface.rows.length - 1].x_surface;
+    for (let row of data.base.rows) {
+      data_base.push({x: row.x_base, y: row.z_base});
+    }
+    for (let row of data.future.rows) {
+      data_future.push({x: row.x_future, y: row.z_future});
+    }
+    for (let row of data.surface.rows) {
+      data_surface.push({x: row.x_surface, y: row.z_surface});
+    }
+    var cross_sections_chart = new Chart(sections_ctx, {
+      type: 'line',
+      data: {
+        datasets : [
+          {
+            label: 'Base water table',
+            xAxisId: 'x1',
+            yAxisId: 'y1',
+            fill: 'bottom',
+            lineTension: 0,
+            spanGaps: true,
+            backgroundColor: "rgba(8,48,107,0.1)",
+            borderWidth: 0.5,
+            borderColor: "rgba(8,48,107,1)",
+            borderJoinStyle: "round",
+            pointRadius: 0,
+            data: data_base
+          },
+          {
+            label: 'Future water table',
+            xAxisId: 'x1',
+            yAxisId: 'y1',
+            fill: 'bottom',
+            lineTension: 0,
+            spanGaps: true,
+            backgroundColor: "rgba(8,48,107,0.25)",
+            borderWidth: 1,
+            borderDash: [5, 3],
+            borderColor: "rgba(8,48,107,1)",
+            borderJoinStyle: "round",
+            pointRadius: 0,
+            data: data_future
+          },
+          {
+            label: 'Ground surface',
+            xAxisId: 'x1',
+            yAxisId: 'y1',
+            fill: 'top',
+            lineTension: 0,
+            spanGaps: true,
+            backgroundColor: "rgba(200,200,200,0.4)",
+            borderWidth: 1,
+            borderColor: "rgba(0,0,0,1)",
+            borderJoinStyle: "round",
+            pointRadius: 0,
+            data: data_surface
+          }
+        ]
+      },
+      options: {
+        responsive: false,
+        title: {
+          text: 'Water storage potential',
+          display: true,
+          position: 'bottom'
+        },
+        legend: {
+          display: true,
+          position: 'bottom'
+        },
+        bezierCurve: false,
+        scales: {
+          yAxes: [{
+            id: 'y1',
+            ticks: {
+              callback: function(label, index, labels) {
+                if (label === 0) {
+                  return 'Sea level';
+                } else {
+                  return label+' m';
+                }
+              }
+            },
+            position: 'left',
+            type: 'linear',
+            gridLines: {
+              zeroLineColor: 'rgba(0,0,0,1)'
+            }
+          }],
+          xAxes: [
+            {
+              id: 'x1',
+              display: false,
+              position: 'bottom',
+              gridLines: {
+                display: false
+              },
+              ticks: {
+                min: xMin,
+                max: xMax
+              },
+              type: 'linear',
+              linear: {
+                maxTicksLimit: 2
+              }
+            }
+          ]
+        },
+        tooltips: {
+          enabled: false
+        }
+      }
+    });
+  }
+
   showPopup(e, popup) {
     var self = this;
     var features = self.map.queryRenderedFeatures(e.point, {layers: ['red_cross', 'buildings']});
     var landuse = self.map.queryRenderedFeatures(e.point, {layers: ['landuse']});
     var fldhaz = self.map.queryRenderedFeatures(e.point, {layers: ['FLDHVE', 'FLDHAO', 'FLDHAE', 'FLDHAH', 'FLDHX']});
     var markers = self.map.queryRenderedFeatures(e.point, {layers: ['gw_wells']});
+    var gauges = self.map.queryRenderedFeatures(e.point, {layers: ['gauges']});
     if (features.length) {
       var feature = features[0];
       var landuse_info = 'Undefined';
@@ -437,19 +573,23 @@ export class LandingUtility {
       popup.addTo(self.map);
     } else if (markers.length) {
       var well = WMS.usgs_water.gw_wells.static[markers[0].properties.uid];
-      var wms_map = WMS.usgs_water.gw_wells.dynamic;
-      wms_map.set('site_no', markers[0].properties.uid);
-      var date;
+      var wms_well_map = WMS.usgs_water.gw_wells.dynamic;
+      wms_well_map.set('site_no', markers[0].properties.uid);
+      var well_date;
       if (well.construction_dt) {
-        date = well.construction_dt.toString().slice(0,4);
+        well_date = well.construction_dt.toString().slice(0,4);
       } else if (well.inventory_dt) {
-        date = well.inventory_dt.toString().slice(0,4);
+        well_date = well.inventory_dt.toString().slice(0,4);
       } else {
-        date = "Unknown";
+        well_date = "Unknown";
       }
       //.setHTML('Name: ' + well.station_nm + ', ' + well.map_nm + '<br>Ground surface altitude: ' + well.alt_va + ' m<br>Construction date: ' + date + '<br>Well depth: ' + well.well_depth_va + ' m')
-
-      self.drawChart(popup, well, wms_map);
+      self.drawChart(popup, well, wms_well_map);
+    } else if (gauges.length) {
+      var gauge = WMS.usgs_water.gauges.static[gauges[0].properties.uid];
+      var wms_gauge_map = WMS.usgs_water.gauges.dynamic;
+      wms_gauge_map.set('site_no', gauges[0].properties.uid);
+      self.drawChart(popup, gauge, wms_gauge_map);
     }
   }
 
@@ -593,7 +733,44 @@ export class LandingUtility {
         };
 
         if (self.mapView === '2d') {
-          popup.setLngLat(center).setHTML('Loading...');
+          if (self.map.getLayer('queriedSection')) {
+            self.map.removeLayer('queriedSection');
+            self.map.removeSource('queriedSection');
+          }
+          self.map.fitBounds([[-80.4762, center[1]], [-80.07492, center[1]]]);
+          self.map.addLayer({
+            "id": "queriedSection",
+            "type": "line",
+            "source": {
+              "type": "geojson",
+              "data": {
+                "type": "Feature",
+                "properties": {},
+                "geometry": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-80.46, center[1]],
+                    [-80.075, center[1]]
+                  ]
+                }
+              }
+            },
+            "layout": {
+              "line-cap": "butt"
+            },
+            "paint": {
+              "line-color": "#08306b",
+              "line-width": 2
+            }
+          });
+          self.pointQuery('/section/pointlat', {lat: latlng_obj.lat}, 'application/json')
+          .then(res => {
+            console.log(res);
+            self.drawSections(res);
+          }).catch(err => {
+            console.log(err);
+          });
+          /*popup.setLngLat(center).setHTML('Loading...');
           self.pointQuery('/point/zone', latlng_obj, 'application/json')
           .then(res => {
             var popupContent = {fld_hzd: res[0].fld_zone, lnd_use: res[1].land_use};
@@ -601,9 +778,15 @@ export class LandingUtility {
           }).catch((err) => {
             popup.setHTML('Out of bounds');
             console.log(err);
-          });
+          });*/
         } else if (self.mapView === '3d') {
-          popup.setLngLat(center).setHTML('Loading...');
+          self.pointQuery('/section/linestring', {lat: latlng_obj.lat}, 'application/json')
+          .then(res => {
+            console.log(res);
+          }).catch(err => {
+            console.log(err);
+          });
+          /*popup.setLngLat(center).setHTML('Loading...');
           self.pointQuery('/point/elev', latlng_obj, 'application/json')
           .then(res => {
             var popupContent = {elev: res[0].elev};
@@ -612,7 +795,7 @@ export class LandingUtility {
           }).catch((err) => {
             popup.setHTML('Out of bounds');
             console.log(err);
-          });
+          });*/
         }
 
         //Mapbox query rendered features - front-end analysis
@@ -717,41 +900,110 @@ export class LandingUtility {
             });
           });
         } else if (self.sel_query_setting === 'storage') {
-          self.map.removeLayer('storage');
-          self.areaQuery('/area/storage', {coords: line_string}, 'application/json')
+          if (self.map.getLayer('storage_build')) {
+            self.map.removeLayer('storage_build');
+            self.map.removeLayer('storage_lot');
+            self.map.removeSource('storage_build');
+            self.map.removeSource('storage_lot');
+          }
+          self.areaQuery('/area2/storage', {coords: line_string}, 'application/json')
           .then(topo_data => {
-            var geo_data = topojson.feature(topo_data, topo_data.objects.output);
+            var geo_data = {
+              build: topojson.feature(topo_data.build, topo_data.build.objects.output),
+              lot: topojson.feature(topo_data.lot, topo_data.lot.objects.output)
+            };
             self.map.addLayer({
-              'id': 'storage',
+              'id': 'storage_lot',
               'type': 'fill',
               'source': {
                 'type': 'geojson',
-                'data': geo_data
+                'data': geo_data.lot
               },
               'source-layer': '',
               'layout': {
-                'visibility': 'none'
+                'visibility': 'visible'
               },
               'paint': {
                 'fill-color': {
                   'property': 'elev',
                   'type': 'exponential',
                   'stops': [
-                    [1, '#c7dcef'],
-                    [30, '#08306b']
+                    [0, '#c1272d'],
+                    [13, '#f2d3d5']
+                  ]
+                },
+                'fill-opacity': 1
+              }
+            });
+            self.map.addLayer({
+              'id': 'storage_build',
+              'type': 'fill',
+              'source': {
+                'type': 'geojson',
+                'data': geo_data.build
+              },
+              'source-layer': '',
+              'layout': {
+                'visibility': 'visible'
+              },
+              'paint': {
+                'fill-color': {
+                  'property': 'potential',
+                  'type': 'exponential',
+                  'stops': [
+                    [-2.5, '#c7dcef'],
+                    [10, '#08306b']
                   ]
                 },
                 'fill-opacity': 1
               }
             });
           });
-        } else if (self.sel_query_setting === 'retention') {
-          self.map.removeLayer('retention');
-          self.areaQuery('/area/retention', {coords: line_string}, 'application/json')
+        } else if (self.sel_query_setting === 'contours') {
+          if (self.map.getLayer('contours')) {
+            self.map.removeLayer('contours');
+            self.map.removeSource('contours');
+          }
+          self.areaQuery('/area/contours', {coords: line_string}, 'application/json')
           .then(topo_data => {
             var geo_data = topojson.feature(topo_data, topo_data.objects.output);
             self.map.addLayer({
-              'id': 'retention',
+              'id': 'contours',
+              'type': 'line',
+              'source': {
+                'type': 'geojson',
+                'data': geo_data
+              },
+              'source-layer': '',
+              'layout': {
+                'visibility': 'visible'
+              },
+              'paint': {
+                'line-color': {
+                  'property': 'elev',
+                  'type': 'exponential',
+                  'stops': [
+                    [-4, '#28211d'],
+                    [4, '#563b1b'],
+                    [12, '#638251'],
+                    [20, '#cde29f']
+
+                  ]
+                },
+                'line-width': 0.25
+              }
+            });
+          });
+        } else if (self.sel_query_setting === 'elevation') {
+          if (self.map.getLayer('elevation')) {
+            self.map.removeLayer('elevation');
+            self.map.removeSource('elevation');
+          }
+          self.areaQuery('/area/elevation', {coords: line_string}, 'application/json')
+          .then(topo_data => {
+            var geo_data = topojson.feature(topo_data, topo_data.objects.output);
+            self.map.addLayer({
+              'id': 'elevation',
               'type': 'fill',
               'source': {
                 'type': 'geojson',
@@ -763,18 +1015,23 @@ export class LandingUtility {
               },
               'paint': {
                 'fill-color': {
-                  'property': 'val',
+                  'property': 'elev',
                   'type': 'exponential',
                   'stops': [
-                    [0, '#c7dcef'],
-                    [20, '#08306b']                  ]
+                    [-4, '#28211d'],
+                    [4, '#563b1b'],
+                    [12, '#638251'],
+                    [20, '#cde29f']
+                  ]
                 },
                 'fill-opacity': {
                   'property': 'val',
                   'type': 'exponential',
                   'stops': [
-                    [0, 0.1],
-                    [20, 1]
+                    [-4, 0.1],
+                    [4, 0.33],
+                    [12, 0.66],
+                    [20, 0.9]
                   ]
                 }
               }

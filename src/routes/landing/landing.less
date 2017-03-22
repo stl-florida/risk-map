@@ -126,6 +126,17 @@
   right: 0px;
   width: 100%;
   height: 100%;
+  & #section_wrapper {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background-color: fade(@snow-white, 75%);
+    height: auto;
+    z-index: 1500;
+    & #cross_sections {
+      z-index: 2000;
+    }
+  }
 }
 
 & #url_logo {

@@ -40,11 +40,44 @@ var WMS = {
         ['begin_date', '2017-03-15'],
         ['end_date', '2017-03-16']
       ])
+    },
+    gauges: {
+      static: {
+        "255828080401301": {"station_nm":"SITE 64 IN CONSERVATION AREA 3A NR COOPERTOWN FL.","dec_lat_va":25.97513889,"dec_long_va":-80.6696111},
+        "260007080464401": {"station_nm":"W-18 IN WATER CONSERVATION AREA 3-A","dec_lat_va":26.00194444,"dec_long_va":-80.77888889},
+        "260037080303401": {"station_nm":"SITE 76 IN CONSERVATION AREA 3B NR ANDYTOWN, FL","dec_lat_va":26.0076472,"dec_long_va":-80.48236389},
+        "260042080351701": {"station_nm":"EDEN 12 IN WATER CONSERVATION AREA 3-A","dec_lat_va":26.01166667,"dec_long_va":-80.5880556},
+        "260051080404001": {"station_nm":"W-15 IN WATER CONSERVATION AREA 3-A","dec_lat_va":26.01416667,"dec_long_va":-80.6777778},
+        "260324080421900": {"station_nm":"3A-5 IN WATER CONSERVATION AREA 3A","dec_lat_va":26.05666667,"dec_long_va":-80.7052778},
+        "260410080452701": {"station_nm":"EDEN 14 IN WATER CONSERVATION AREA 3-A","dec_lat_va":26.06944444,"dec_long_va":-80.7575},
+        "260536080302501": {"station_nm":"EDEN 4 IN WATER CONSERVATION AREA 3-A","dec_lat_va":26.09333333,"dec_long_va":-80.5069444},
+        "260725080451001": {"station_nm":"EDEN 5 IN WATER CONSERVATION AREA 3-A","dec_lat_va":26.1236111,"dec_long_va":-80.7527778},
+        "260810080222001": {"station_nm":"SITE 99 NR L-35A IN CONS AREA 2B NR SUNRISE, FL","dec_lat_va":26.13644444,"dec_long_va":-80.3670833},
+        "261023080443001": {"station_nm":"SITE 62 IN CONSERVATION AREA 3A NR ANDYTOWN, FL","dec_lat_va":26.17421944,"dec_long_va":-80.75075},
+        "261035080221701": {"station_nm":"EDEN 13 IN WATER CONSERVATION AREA 2-B","dec_lat_va":26.17638889,"dec_long_va":-80.37138889},
+        "261117080315201": {"station_nm":"SITE 63 IN CONSERVATION AREA NO. 3A NR ANDYTOWN FL","dec_lat_va":26.1884722,"dec_long_va":-80.531},
+        "261150080270001": {"station_nm":"N. NEW RIVER CANAL AT S-11-A NR ANDYTOWN, FL","dec_lat_va":26.17814028,"dec_long_va":-80.44783128},
+        "261200080275001": {"station_nm":"N. NEW RIVER CANAL AT S-11-B NR ANDYTOWN, FL","dec_lat_va":26.2025838,"dec_long_va":-80.45338689},
+        "261300080280001": {"station_nm":"N. NEW RIVER CANAL AT S-11-C NR ANDYTOWN, FL","dec_lat_va":26.2289717,"dec_long_va":-80.4600536},
+        "261319080353201": {"station_nm":"EDEN 9 IN WATER CONSERVATION AREA 3-A","dec_lat_va":26.22194444,"dec_long_va":-80.5922222},
+        "261543080495000": {"station_nm":"L-28 CANAL ABOVE S-140 NEAR CLEWISTON, FL","dec_lat_va":26.26230464,"dec_long_va":-80.83034079},
+        "261710080190001": {"station_nm":"SITE 19 IN CONSERVATION AREA 2A NR CORAL SPRINGS","dec_lat_va":26.2814722,"dec_long_va":-80.30663889},
+        "262240080258001": {"station_nm":"SITE 17 NR L-38, CONS AREA 2A NR CORAL SPRINGS, FL","dec_lat_va":26.28674729,"dec_long_va":-80.4108855}
+      },
+      dynamic: new Map([
+        ['cb_00065', 'on'],
+        ['format', 'rdb'],
+        ['site_no', null],
+        ['period', '2'], //parametric
+        ['begin_date', '2017-03-15'], //parametric
+        ['end_date', '2017-03-17'] //calculate
+      ])
     }
   }
 };
 
 var getWMS_data = (feature_list, identifiers, marker_icon) => {
+  //Use dbgeo / dbgeo_gen lib to parse into geojson
   let features = [];
   for (let feature in feature_list) {
     features.push({
@@ -318,10 +351,24 @@ var LAYERS = {
     source: {
       name: 'geojson_format',
       type: 'geojson',
-      data: getWMS_data(WMS.usgs_water.gw_wells.static, {lat: 'dec_lat_va', long: 'dec_long_va'}, 'marker-15'),
+      data: getWMS_data(WMS.usgs_water.gw_wells.static, {lat: 'dec_lat_va', long: 'dec_long_va'}, 'circle-11'),
       layer: null
     },
     tooltip_text: 'Realtime ground water monitoring feed',
+    visibility: 'visible'
+  },
+  'gauges': {
+    group_no: '4',
+    label: 'USGS gauges',
+    layer_id: 'gauges',
+    type: 'symbol',
+    source: {
+      name: 'geojson_format',
+      type: 'geojson',
+      data: getWMS_data(WMS.usgs_water.gauges.static, {lat: 'dec_lat_va', long: 'dec_long_va'}, 'triangle-stroked-15'),
+      layer: null
+    },
+    tooltip_text: 'Realtime gauge height monitoring feed',
     visibility: 'visible'
   },
   'contours': {
