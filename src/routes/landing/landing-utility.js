@@ -4,15 +4,38 @@ import {HttpClient} from 'aurelia-http-client';
 import * as topojson from 'topojson-client';
 import Chart from 'chart';
 import $ from 'jquery';
+import polyline from 'polyline';
 
 export class LandingUtility {
   constructor() {
     this.map = null;
-    this.controlGroups = [];
     this.mapView = '2d'; //TODO: DELETE
     this.area_query = ['age', 'hazard', 'storage', 'elevation'];
     this.sel_query_setting = 'age';
     this.isSectionPaneOpen = false;
+    this.map_styles = [
+      {
+        name: 'Streets light',
+        url: 'light-v9'
+      },
+      {
+        name: 'Streets dark',
+        url: 'dark-v9'
+      },
+      {
+        name: 'Satellite',
+        url: 'satellite-v9'
+      },
+      {
+        name: 'Streets default',
+        url: 'streets-v9'
+      }
+    ];
+    this.sel_map_style = 'light-v9';
+  }
+
+  changeMapStyle() {
+    this.map.setStyle('mapbox://styles/mapbox/' + this.sel_map_style);
   }
 
   getWMS(type, params) {
@@ -109,15 +132,15 @@ export class LandingUtility {
         .withHeader('Content-Type', 'application/json')
         .withInterceptor({
           request(msg) {
-            console.log(msg);
+            //console.log(msg);
           },
           requestError(err) {
             reject(err);
           },
           response(msg) {
-            //var res = JSON.parse(msg.response);
-            console.log(res);
-            //resolve(topojson.feature(res, res.objects.output));
+            var res = JSON.parse(msg.response);
+            //console.log(res);
+            resolve(res);
           },
           responseError(err) {
             reject(err);
@@ -250,6 +273,7 @@ export class LandingUtility {
 
   loadLayers() {
     var self = this;
+    self.controlGroups = [];
     //TODO: Structure LAYERS by group_no, use for.. of loop
     // Push object to self.controlGroups only if atleast one layer is toggleable
     //Control group '0'
@@ -265,7 +289,7 @@ export class LandingUtility {
     self.addLayer(null, LAYERS.water_bodies);
     self.addLayer(null, LAYERS.salt_water);
     self.addLayer(null, LAYERS.contours);
-    //self.addLayer('/slosh', LAYERS.storm_surge);
+    self.addLayer(null, LAYERS.stormsurge);
 
     //Control group '2'
     self.controlGroups.push({group_no: '2', name: 'City Data', id: 'city_data', controls: []});
@@ -275,7 +299,9 @@ export class LandingUtility {
     //Control group '3'
     self.controlGroups.push({group_no: '3', name: 'Physical Infrastructure', id: 'phy_inf', controls: []});
     self.addLayer(null, LAYERS.red_cross);
-    self.addLayer(null, LAYERS.buildings);
+    if (self.sel_map_style !== 'satellite-v9') { //No buildings included
+      self.addLayer(null, LAYERS.buildings);
+    }
 
     //Control group '4'
     self.controlGroups.push({group_no: '4', name: 'Realtime water monitoring', id: 'liv_usgs', controls: []});
@@ -577,7 +603,12 @@ export class LandingUtility {
 
   showPopup(e, popup) {
     var self = this;
-    var features = self.map.queryRenderedFeatures(e.point, {layers: ['red_cross', 'buildings']});
+    var features;
+    if (self.sel_map_style === 'satellite-v9') {
+      features = self.map.queryRenderedFeatures(e.point, {layers: ['red_cross']});
+    } else {
+      features = self.map.queryRenderedFeatures(e.point, {layers: ['red_cross', 'buildings']});
+    }
     var landuse = self.map.queryRenderedFeatures(e.point, {layers: ['landuse']});
     var fldhaz = self.map.queryRenderedFeatures(e.point, {layers: ['FLDHVE', 'FLDHAO', 'FLDHAE', 'FLDHAH', 'FLDHX']});
     var markers = self.map.queryRenderedFeatures(e.point, {layers: ['gw_wells']});
@@ -709,8 +740,10 @@ export class LandingUtility {
       var visibility = self.map.getLayoutProperty(layer_id, 'visibility');
       if (visibility === 'visible') {
         self.map.setLayoutProperty(layer_id, 'visibility', 'none');
+        LAYERS[layer_id].visibility = 'none';
       } else {
         self.map.setLayoutProperty(layer_id, 'visibility', 'visible');
+        LAYERS[layer_id].visibility = 'visible';
       }
     }
   }
@@ -739,9 +772,11 @@ export class LandingUtility {
           $('#toggle_' + layer_id).removeClass('active');
           $('#toggle_' + layer_id).addClass('active');
           self.map.setLayoutProperty(layer_id, 'visibility', 'visible');
+          LAYERS[layer_id].visibility = 'visible';
         } else {
           $('#toggle_' + layer_id).removeClass('active');
           self.map.setLayoutProperty(layer_id, 'visibility', 'none');
+          LAYERS[layer_id].visibility = 'none';
         }
       }
     }
@@ -1060,10 +1095,39 @@ export class LandingUtility {
 
   addDirectionsLayer(coords) {
     var self = this;
+    if (self.map.getLayer('directions')) {
+      self.map.removeLayer('directions');
+      self.map.removeSource('directions');
+    }
     var formatted_coords = coords.source.lng + '%2C' + coords.source.lat + '%3B' + coords.destination.lng + '%2C' + coords.destination.lat + '.json';
     self.getRouting('mapbox/driving', formatted_coords)
     .then(res => {
-
+      var flipped_array = polyline.decode(res.routes[0].geometry);
+      var coords_array = [];
+      for (let point of flipped_array) {
+        coords_array.push([point[1], point[0]]);
+      }
+      var geo_data = {
+        "type": "LineString",
+        "coordinates": coords_array
+      };
+      self.map.addLayer({
+        'id': 'directions',
+        'type': 'line',
+        'source': {
+          'type': 'geojson',
+          'data': geo_data
+        },
+        'source-layer': '',
+        'layout': {
+          'visibility': 'visible'
+        },
+        'paint': {
+          'line-color': '#dd0000',
+          'line-dasharray': [1.2,0.6],
+          'line-width': 8
+        }
+      });
     });
   }
 
@@ -1071,7 +1135,7 @@ export class LandingUtility {
     var self = this;
     if (self.isSectionPaneOpen) {
       var left_offset = $('#map_wrapper').offset().left,
-          section_yaxis_offset = 40,
+          section_yaxis_offset = 60, //width of yaxis labels
           left_query = left_offset + section_yaxis_offset,
           right_query = $(window).width() - left_offset,
           left_coord = self.map.unproject([left_query, 100]),

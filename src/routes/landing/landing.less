@@ -27,6 +27,7 @@
     width: 100%;
     & .setView {
       width: 50%;
+      margin: 0 0 6px 0;
       float: left;
       background-color: lighten(@dark-gray, 10%);
       border: none;
@@ -36,8 +37,23 @@
       &.active {
         background-color: @water-blue;
       }
-      margin-bottom: 18px;
     }
+    & #map_style {
+      padding-left: 28px;
+      & p {
+        margin: 0;
+        .label-medium(12px, @water-blue);
+      }
+      & select {
+        width: 88%;
+        border: none;
+        /*-webkit-appearance: none;*/
+        outline: none;
+        background-color: lighten(@dark-gray, 10%);
+        .label-light(12px, @snow-white);
+      }
+    }
+    margin-bottom: 18px;
   }
   & .controlGroups {
     & .groupToggle {

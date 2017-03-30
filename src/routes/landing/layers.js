@@ -37,8 +37,8 @@ var WMS = {
         ['format', 'rdb'],
         ['site_no', null],
         ['period', '1'],
-        ['begin_date', '2017-03-15'],
-        ['end_date', '2017-03-16']
+        ['begin_date', '2017-03-29'],
+        ['end_date', '2017-03-30']
       ])
     },
     gauges: {
@@ -69,8 +69,8 @@ var WMS = {
         ['format', 'rdb'],
         ['site_no', null],
         ['period', '2'], //parametric
-        ['begin_date', '2017-03-15'], //parametric
-        ['end_date', '2017-03-17'] //calculate
+        ['begin_date', '2017-03-28'], //parametric
+        ['end_date', '2017-03-30'] //calculate
       ])
     }
   }
@@ -109,7 +109,7 @@ var LAYERS = {
       name: 'mapbox_user',
       type: 'vector',
       data: 'b0mn3fbb',
-      layer: 'FLDHVE',
+      layer: 'FLDHVE'
     },
     paint: {
       'fill-color': '#31aade',
@@ -128,7 +128,7 @@ var LAYERS = {
       name: 'mapbox_user',
       type: 'vector',
       data: '1eqmjn9o',
-      layer: 'FLDHAO',
+      layer: 'FLDHAO'
     },
     paint: {
       'fill-color': '#31aade',
@@ -147,7 +147,7 @@ var LAYERS = {
       name: 'mapbox_user',
       type: 'vector',
       data: '4cou1y2j',
-      layer: 'FLDHAE',
+      layer: 'FLDHAE'
     },
     paint: {
       'fill-color': '#31aade',
@@ -166,7 +166,7 @@ var LAYERS = {
       name: 'mapbox_user',
       type: 'vector',
       data: '758t0cbw',
-      layer: 'FLDHAH',
+      layer: 'FLDHAH'
     },
     paint: {
       'fill-color': '#31aade',
@@ -185,7 +185,7 @@ var LAYERS = {
       name: 'mapbox_user',
       type: 'vector',
       data: '44qg0o2f',
-      layer: 'FLDHX',
+      layer: 'FLDHX'
     },
     paint: {
       'fill-color': '#31aade',
@@ -205,7 +205,7 @@ var LAYERS = {
       name: 'mapbox_user',
       type: 'vector',
       data: 'c5vfi3yr',
-      layer: 'S_WTR',
+      layer: 'S_WTR'
     },
     paint: {
       'fill-color': '#1a1a1a',
@@ -223,7 +223,7 @@ var LAYERS = {
       name: 'geojson_format',
       type: 'geojson',
       data: 'https://raw.githubusercontent.com/stl-florida/data-layers/master/saltwaterFlorida.geojson',
-      layer: '',
+      layer: ''
     },
     paint: {
       'line-color': '#c1272d',
@@ -242,7 +242,7 @@ var LAYERS = {
       name: 'mapbox_user',
       type: 'vector',
       data: '2kwgic7s',
-      layer: 'landuse',
+      layer: 'landuse'
     },
     paint: {
       'fill-color': lbcsCodes,
@@ -261,7 +261,7 @@ var LAYERS = {
       name: 'geojson_format',
       type: 'geojson',
       data: 'https://raw.githubusercontent.com/stl-florida/data-layers/master/cities.geojson',
-      layer: '',
+      layer: ''
     },
     paint: {
       'line-color': '#aaaaaa'
@@ -298,7 +298,7 @@ var LAYERS = {
       name: null,
       type: null,
       data: null,
-      layer: null,
+      layer: null
     },
     paint: {
       'fill-extrusion-color': '#aaaaaa',
@@ -315,20 +315,20 @@ var LAYERS = {
     tooltip_text: 'Building footprints and 3d volumes',
     visibility: 'none'
   },
-  'storm_surge': {
-    group_no: '4',
+  'stormsurge': {
+    group_no: '1',
     label: 'Storm surge heights',
-    layer_id: 'storm_surge',
+    layer_id: 'stormsurge',
     type: 'fill',
     source: {
-      name: 'geojson_format',
-      type: 'geojson',
-      data: null,
-      layer: '',
+      name: 'mapbox_user',
+      type: 'vector',
+      data: '41947bz4',
+      layer: 'stormsurge'
     },
     paint: {
       'fill-color': {
-        'property': 'cat',
+        'property': 'CAT',
         'type': 'categorical',
         'stops': [
           ['1', '#c1272d'],
@@ -338,7 +338,17 @@ var LAYERS = {
           ['5', '#f2d3d5']
         ]
       },
-      'fill-opacity': 0.7
+      'fill-opacity': {
+        'property': 'CAT',
+        'type': 'categorical',
+        'stops': [
+          ['1', 0.7],
+          ['2', 0.6],
+          ['3', 0.5],
+          ['4', 0.4],
+          ['5', 0.3]
+        ]
+      }
     },
     tooltip_text: 'Storm surge heights based on SLOSH model',
     visibility: 'none'
@@ -380,7 +390,7 @@ var LAYERS = {
       name: 'mapbox_user',
       type: 'vector',
       data: '1uj351nf',
-      layer: 'contours',
+      layer: 'contours'
     },
     'paint': {
       'line-color': {
@@ -407,7 +417,7 @@ var LAYERS = {
       name: 'mapbox_global',
       type: 'vector',
       data: 'mapbox://mapbox.mapbox-terrain-v2',
-      layer: 'hillshade',
+      layer: 'hillshade'
     },
     paint: {
       'fill-color': {

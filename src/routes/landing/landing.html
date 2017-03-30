@@ -9,6 +9,12 @@
     <div id="mapview_toggle_wrapper">
       <button class="setView active" click.delegate="utility.toggleMapview('2d')">2D</button>
       <button class="setView" click.delegate="utility.toggleMapview('3d')">3D</button>
+      <div id="map_style">
+        <p>Base map style:</p>
+        <select value.bind="utility.sel_map_style" change.delegate="utility.changeMapStyle()">
+          <option repeat.for="style of utility.map_styles" model.bind="style.url">${style.name}</option>
+        </select>
+      </div>
     </div>
     <div class="sectionHeader">
       <i class="icon-layers"></i>&nbsp;Layers

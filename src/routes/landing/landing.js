@@ -41,26 +41,26 @@ export class Landing {
 
     self.utility.map.addControl(new mapboxgl.NavigationControl());
 
-    self.utility.map.on('load', () => {
+    /*self.utility.map.on('load', () => {
       self.utility.loadLayers();
-    });
+    });*/
 
     var popup = new mapboxgl.Popup({
         closeButton: true,
         closeOnClick: false
     });
     self.utility.map.on('click', (e) => {
-      self.utility.showPopup(e, popup);
-      if (self.pick_source) {
+      if (self.pick_source && !self.pick_destination) {
         self.picked_source = e.lngLat;
-      }
-      if (self.pick_source && self.pick_destination) {
+      } else if (self.pick_source && self.pick_destination) {
         self.pick_source = false;
         self.pick_destination = false;
         var coords = {source: self.picked_source, destination: e.lngLat};
         self.utility.addDirectionsLayer(coords);
         self.picked_source = null;
         $('#dir_source').removeClass('active');
+      } else {
+        self.utility.showPopup(e, popup);
       }
     });
 
@@ -73,6 +73,10 @@ export class Landing {
       }
     });
     self.utility.map.addControl(draw);
+
+    self.utility.map.on('style.load', () => {
+      self.utility.loadLayers();
+    });
 
     self.utility.map.on('draw.delete', () => {
       popup.remove();
@@ -88,9 +92,18 @@ export class Landing {
 
     self.utility.map.on('mousemove', (e) => {
       if (self.utility.map.getLayer('red_cross') || self.utility.map.getLayer('buildings')) {
-        var features = self.utility.map.queryRenderedFeatures(e.point, {layers: ['red_cross', 'buildings']});
+        var features;
+        if (self.utility.sel_map_style === 'satellite-v9') {
+          features = self.utility.map.queryRenderedFeatures(e.point, {layers: ['red_cross', 'gauges', 'gw_wells']});
+        } else {
+          features = self.utility.map.queryRenderedFeatures(e.point, {layers: ['buildings', 'red_cross', 'gauges', 'gw_wells']});
+        }
         self.utility.map.getCanvas().style.cursor = features.length ? 'pointer' : '';
       }
+    });
+
+    self.utility.map.on('moveend', e => {
+      self.utility.updateSections(e);
     });
 
     $(window).resize(() => {

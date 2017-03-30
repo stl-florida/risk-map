@@ -167,6 +167,11 @@
             ]
           },
           {
+            "name": "polyline",
+            "path": "../node_modules/polyline/src",
+            "main": "polyline"
+          },
+          {
             "name": "topojson-client",
             "path": "../node_modules/topojson-client/dist",
             "main": "topojson-client"
