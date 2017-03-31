@@ -1,11 +1,11 @@
 @font-face {
   font-family: 'fontello';
-  src: url('../font/fontello.eot?15567374');
-  src: url('../font/fontello.eot?15567374#iefix') format('embedded-opentype'),
-       url('../font/fontello.woff2?15567374') format('woff2'),
-       url('../font/fontello.woff?15567374') format('woff'),
-       url('../font/fontello.ttf?15567374') format('truetype'),
-       url('../font/fontello.svg?15567374#fontello') format('svg');
+  src: url('../font/fontello.eot?68906486');
+  src: url('../font/fontello.eot?68906486#iefix') format('embedded-opentype'),
+       url('../font/fontello.woff2?68906486') format('woff2'),
+       url('../font/fontello.woff?68906486') format('woff'),
+       url('../font/fontello.ttf?68906486') format('truetype'),
+       url('../font/fontello.svg?68906486#fontello') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -15,7 +15,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'fontello';
-    src: url('../font/fontello.svg?15567374#fontello') format('svg');
+    src: url('../font/fontello.svg?68906486#fontello') format('svg');
   }
 }
 */
@@ -64,12 +64,21 @@
 .icon-keyboard:before { content: '\e806'; } /* '' */
 .icon-trash-empty:before { content: '\e807'; } /* '' */
 .icon-layers:before { content: '\e808'; } /* '' */
-.icon-check:before { content: '\e809'; } /* '' */
 .icon-menu:before { content: '\e80a'; } /* '' */
+.icon-query:before { content: '\e80b'; } /* '' */
 .icon-info:before { content: '\e80c'; } /* '' */
 .icon-block:before { content: '\e80d'; } /* '' */
 .icon-camera-1:before { content: '\e80e'; } /* '' */
-.icon-check-empty:before { content: '\f096'; } /* '' */
+.icon-attention:before { content: '\e80f'; } /* '' */
+.icon-hazard:before { content: '\e810'; } /* '' */
+.icon-elevation:before { content: '\e811'; } /* '' */
+.icon-storage:before { content: '\e812'; } /* '' */
+.icon-age:before { content: '\e813'; } /* '' */
+.icon-location:before { content: '\e814'; } /* '' */
+.icon-check-all:before { content: '\e815'; } /* '' */
+.icon-check-some:before { content: '\e816'; } /* '' */
+.icon-check-none:before { content: '\e817'; } /* '' */
 .icon-angle-double-left:before { content: '\f100'; } /* '' */
 .icon-angle-double-right:before { content: '\f101'; } /* '' */
+.icon-chart-area:before { content: '\f1fe'; } /* '' */
 .icon-map:before { content: '\f279'; } /* '' */

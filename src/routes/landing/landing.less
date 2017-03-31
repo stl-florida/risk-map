@@ -10,7 +10,7 @@
   left: -@tool-bar-width;
   width: @tool-bar-width;
   height: 100%;
-  padding-top: 24px;
+  padding-top: 12px;
   background-color: @dark-gray;
   z-index: 1000;
   &.active {
@@ -19,6 +19,7 @@
   & .sectionHeader {
     .label-medium(14px, fade(@snow-white, 80%));
     margin: 0px;
+    margin-top: 12px;
     padding: 0px 5px 5px 5px;
     cursor: default;
     border-bottom: 1px solid @water-blue;
@@ -53,7 +54,6 @@
         .label-light(12px, @snow-white);
       }
     }
-    margin-bottom: 18px;
   }
   & .controlGroups {
     & .groupToggle {
@@ -117,10 +117,24 @@
   & #query_selector {
     width: 100%;
     padding-top: 6px;
-    padding-left: 28px;
+    padding-left: 8px;
     & label {
-      .label-light(12px, @snow-white);
-      text-transform: capitalize;
+      cursor: pointer;
+      & input {
+        display: none;
+      }
+      & i {
+        .label-light(48px, @snow-white);
+        &:hover {
+          .label-light(48px, darken(@water-blue, 20%));
+        }
+      }
+      &.active {
+        & i {
+          .label-light(48px, @water-blue);
+          text-shadow: 1px 1px 1px darken(@water-blue, 5%);
+        }
+      }
     }
   }
   & #tooltip_wrapper {
@@ -136,11 +150,10 @@
     }
   }
   & #directions_selector {
-    margin-top: 12px;
     width: 100%;
     & p {
       padding-left: 28px;
-      margin: 0;
+      margin: 3px 0px;
       .label-medium(12px, @water-blue);
     }
     & .dirBtn {

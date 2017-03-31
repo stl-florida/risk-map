@@ -41,10 +41,6 @@ export class Landing {
 
     self.utility.map.addControl(new mapboxgl.NavigationControl());
 
-    /*self.utility.map.on('load', () => {
-      self.utility.loadLayers();
-    });*/
-
     var popup = new mapboxgl.Popup({
         closeButton: true,
         closeOnClick: false
@@ -74,6 +70,7 @@ export class Landing {
     });
     self.utility.map.addControl(draw);
 
+    // suffices for map.on('load' => {}); as well
     self.utility.map.on('style.load', () => {
       self.utility.loadLayers();
     });
@@ -109,5 +106,13 @@ export class Landing {
     $(window).resize(() => {
       this.utility.map.resize();
     });
+
+    //utility.sel_query_setting = 'age' DEFAULT
+    $('#query_tab_age').addClass("active");
+  }
+
+  switchQueryMode(query) {
+    $('.qryTabs').removeClass("active");
+    $('#query_tab_' + query).addClass("active");
   }
 }

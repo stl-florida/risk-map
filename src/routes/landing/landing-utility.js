@@ -10,8 +10,8 @@ export class LandingUtility {
   constructor() {
     this.map = null;
     this.mapView = '2d'; //TODO: DELETE
-    this.area_query = ['age', 'hazard', 'storage', 'elevation'];
-    this.sel_query_setting = 'age';
+    this.area_query = ['age', 'hazard', 'elevation', 'storage'];
+    this.sel_query_setting = 'age'; //landing.js addClass("active")
     this.isSectionPaneOpen = false;
     this.map_styles = [
       {
@@ -726,9 +726,30 @@ export class LandingUtility {
   }
 
   //Toggle layer visibility parameter & toggle buttons appearance
-  toggleLayer(layer_id) {
+  toggleLayer(layer_id, group_no) {
     var self = this;
     $('#toggle_'+layer_id).toggleClass('active');
+
+    // modify checkbox state
+    var active_layer_count = 0;
+    for (let i in self.controlGroups[group_no].controls) {
+      var layer_in_group = self.controlGroups[group_no].controls[i].id;
+      if ($('#toggle_'+layer_in_group).hasClass('active')) {
+        active_layer_count += 1;
+      }
+    }
+    if (active_layer_count === 0) {
+      $('#toggle_all_' + group_no + ' > i').removeClass('active');
+      $('#toggle_all_' + group_no + ' > i.icon-check-none').addClass('active');
+    } else if (active_layer_count < self.controlGroups[group_no].controls.length) {
+      $('#toggle_all_' + group_no + ' > i').removeClass('active');
+      $('#toggle_all_' + group_no + ' > i.icon-check-some').addClass('active');
+    } else if (active_layer_count === self.controlGroups[group_no].controls.length) {
+      $('#toggle_all_' + group_no + ' > i').removeClass('active');
+      $('#toggle_all_' + group_no + ' > i.icon-check-all').addClass('active');
+    }
+
+    //change layer visibility parameters to render / remove from map
     if (LAYERS[layer_id].render_opacity) {
       var opacity = self.map.getPaintProperty(layer_id, 'fill-opacity');
       if (opacity === 0) {
@@ -754,13 +775,13 @@ export class LandingUtility {
     $('#toggle_' + group_name + ' > i').toggleClass('active');
   }
 
-  toggleAll(group_no) {
+  toggleAll(group_no) { // separate function which checks state change, then updates checkbox icons | call at initialisation
     var self = this;
     for (let i in self.controlGroups[group_no].controls) {
       var layer_id = self.controlGroups[group_no].controls[i].id;
       if (LAYERS[layer_id].render_opacity) {
-        if ($('#toggle_all_' + group_no + ' > i.icon-check-empty').hasClass('active')) {
-          $('#toggle_' + layer_id).removeClass('active');
+        if ($('#toggle_all_' + group_no + ' > i.icon-check-none').hasClass('active') || $('#toggle_all_' + group_no + ' > i.icon-check-some').hasClass('active')) {
+          $('#toggle_' + layer_id).removeClass('active'); //force remove and add
           $('#toggle_' + layer_id).addClass('active');
           self.map.setPaintProperty(layer_id, 'fill-opacity', LAYERS[layer_id].render_opacity);
         } else {
@@ -768,8 +789,8 @@ export class LandingUtility {
           self.map.setPaintProperty(layer_id, 'fill-opacity', 0);
         }
       } else {
-        if ($('#toggle_all_' + group_no + ' > i.icon-check-empty').hasClass('active')) {
-          $('#toggle_' + layer_id).removeClass('active');
+        if ($('#toggle_all_' + group_no + ' > i.icon-check-none').hasClass('active') || $('#toggle_all_' + group_no + ' > i.icon-check-some').hasClass('active')) {
+          $('#toggle_' + layer_id).removeClass('active'); //force remove and add
           $('#toggle_' + layer_id).addClass('active');
           self.map.setLayoutProperty(layer_id, 'visibility', 'visible');
           LAYERS[layer_id].visibility = 'visible';
@@ -780,7 +801,13 @@ export class LandingUtility {
         }
       }
     }
-    $('#toggle_all_' + group_no + ' > i').toggleClass('active');
+    if ($('#toggle_all_' + group_no + ' > i.icon-check-some').hasClass('active')) {
+      $('#toggle_all_' + group_no + ' > i.icon-check-some').removeClass('active');
+      $('#toggle_all_' + group_no + ' > i.icon-check-all').addClass('active');
+    } else {
+      $('#toggle_all_' + group_no + ' > i.icon-check-none').toggleClass('active');
+      $('#toggle_all_' + group_no + ' > i.icon-check-all').toggleClass('active');
+    }
   }
 
   toggleTooltip(text) {
