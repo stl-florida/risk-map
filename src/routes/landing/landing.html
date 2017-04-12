@@ -2,11 +2,10 @@
   <require from="./landing.css"></require>
   <require from="mapbox-gl/mapbox-gl.css"></require>
   <require from="mapbox-gl-draw/mapbox-gl-draw.css"></require>
+
   <div id="toolbar_wrapper">
     <div class="sectionHeader">
       <i class="icon-map"></i>&nbsp;Map
-      <img id="url_logo" src="assets/graphics/URL_logo.svg"></img>
-      <img id="uot_logo" src="assets/graphics/UoT_logo_white.png"></img>
     </div>
     <div id="mapview_toggle_wrapper">
       <button class="setView active" click.delegate="utility.toggleMapview('2d')">2D</button>
@@ -25,16 +24,16 @@
       <button id.bind="'toggle_'+group.id" class="groupToggle" click.delegate="utility.toggleGroup(group.id)"><i class="icon-right-open active"></i><i class="icon-down-open"></i>&nbsp;&nbsp;${group.name}</button>
       <button id.bind="'toggle_all_'+group.group_no" class="toggleAll" click.delegate="utility.toggleAll(group.group_no)"><i class="icon-check-none active"></i><i class="icon-check-some"></i><i class="icon-check-all"></i></button>
       <div id.bind="'group_'+group.id" class="groupWrapper">
-        <button repeat.for="control of group.controls" id.bind="'toggle_'+control.id" class.bind="control.class" click.delegate="utility.toggleLayer(control.id, group.group_no)" mouseover.delegate="utility.toggleTooltip(control.tooltip)" mouseout.delegate="utility.toggleTooltip(null)">${control.name}</button>
+        <button repeat.for="control of group.controls" id.bind="'toggle_'+control.id" class.bind="control.class" click.delegate="utility.toggleLayer(control.id, group.group_no)" mouseover.delegate="utility.toggleTooltip(control.tooltip, 'Layer information')" mouseout.delegate="utility.toggleTooltip(null, null)">${control.name}</button>
       </div>
     </div>
     <div class="sectionHeader">
-      <i class="icon-query"></i>&nbsp;Query tools
+      <i class="icon-query"></i>&nbsp;Information products
     </div>
     <div id="query_selector">
-      <label repeat.for="query of utility.area_query" class="qryTabs" id.bind="'query_tab_'+query">
-        <input type="radio" model.bind="query" checked.bind="utility.sel_query_setting" change.delegate="switchQueryMode(query)"/>
-        <i class.bind="'icon-'+query"></i>
+      <label repeat.for="query of utility.area_query" class="qryTabs" id.bind="'query_tab_'+query.type">
+        <input type="radio" model.bind="query.type" checked.bind="utility.sel_query_setting" change.delegate="switchQueryMode(query.type)"/>
+        <i class.bind="'icon-'+query.type" mouseover.delegate="utility.toggleTooltip(query.tooltip, 'Query information')" mouseout.delegate="utility.toggleTooltip(null, null)"></i>
       </label>
     </div>
     <div class="sectionHeader">
@@ -45,20 +44,25 @@
       <button id="dir_source" class="dirBtn" disabled.bind="picked_source" click.delegate="activateDirections('source', 'active')">Your location</button>
       <button id="dir_destination" class="dirBtn" disabled.bind="!picked_source" click.delegate="activateDirections('destination', 'active')">Nearest red cross shelter</button>
     </div>
+    <div class="sectionHeader" if.bind="utility.tooltip_text">
+      <i class="icon-info"></i>&nbsp;${utility.tooltip_type}
+    </div>
     <div id="tooltip_wrapper" if.bind="utility.tooltip_text">
-      <p id="tooltip_header">Layer information</p>
       <p innerhtml.bind="utility.tooltip_text"></p>
     </div>
+    <div id="logo_wrapper">
+      <img id="uot_logo" src="assets/graphics/UoT_logo_white.png"></img>
+      <img id="url_logo" src="assets/graphics/URL_logo.svg"></img>
+    </div>
   </div>
+
   <div id="map_wrapper">
     <div id="section_wrapper">
     </div>
   </div>
 
-
   <div id="toolbar_control_wrapper" click.delegate="utility.toggleToolbar()">
     <p class="buttonIcon active"><i class="icon-menu"></i></p>
     <p class="buttonIcon"><i class="icon-angle-double-left"></i></p>
-
   </div>
 </template>

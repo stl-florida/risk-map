@@ -36,9 +36,9 @@ var WMS = {
         ['cb_62610', 'on'],
         ['format', 'rdb'],
         ['site_no', null],
-        ['period', '1'],
-        ['begin_date', '2017-03-29'],
-        ['end_date', '2017-03-30']
+        ['period', '2'],
+        ['begin_date', '2017-04-04'],
+        ['end_date', '2017-04-06']
       ])
     },
     gauges: {
@@ -69,8 +69,8 @@ var WMS = {
         ['format', 'rdb'],
         ['site_no', null],
         ['period', '2'], //parametric
-        ['begin_date', '2017-03-28'], //parametric
-        ['end_date', '2017-03-30'] //calculate
+        ['begin_date', '2017-04-04'], //parametric
+        ['end_date', '2017-04-06'] //calculate
       ])
     }
   }
@@ -112,10 +112,10 @@ var LAYERS = {
       layer: 'FLDHVE'
     },
     paint: {
-      'fill-color': '#31aade',
+      'fill-color': '#fccf23',
       'fill-opacity': 0
     },
-    render_opacity: 1, //Use for base layers which are required to remain visible
+    render_opacity: 0.9, //Use for base layers which are required to remain visible
     tooltip_text: 'A high-risk area where storms drive waves landward at heights of 3 feet or more.',
     visibility: 'visible'
   },
@@ -131,10 +131,10 @@ var LAYERS = {
       layer: 'FLDHAO'
     },
     paint: {
-      'fill-color': '#31aade',
+      'fill-color': '#fc610b',
       'fill-opacity': 0
     },
-    render_opacity: 0.9, //Use for base layers which are required to remain visible
+    render_opacity: 0.8, //Use for base layers which are required to remain visible
     tooltip_text: 'A high-risk area subject to waves less than 1.5 feet in height. This will be separated from the Coastal AE zone by the Limit of Moderate Wave Action (LiMWA). A LiMWA may not always be present, in which case, only Zone AE is shown.',
     visibility: 'visible'
   },
@@ -150,7 +150,7 @@ var LAYERS = {
       layer: 'FLDHAE'
     },
     paint: {
-      'fill-color': '#31aade',
+      'fill-color': '#c44d3f',
       'fill-opacity': 0
     },
     render_opacity: 0.7, //Use for base layers which are required to remain visible
@@ -169,10 +169,10 @@ var LAYERS = {
       layer: 'FLDHAH'
     },
     paint: {
-      'fill-color': '#31aade',
+      'fill-color': '#6576a5',
       'fill-opacity': 0
     },
-    render_opacity: 0.4, //Use for base layers which are required to remain visible
+    render_opacity: 0.5, //Use for base layers which are required to remain visible
     tooltip_text: 'An area inundated by 1% annual chance flooding (usually sheet flow on sloping terrain), for which average depths have been determined; flood depths range from 1 to 3 feet.',
     visibility: 'visible'
   },
@@ -188,10 +188,10 @@ var LAYERS = {
       layer: 'FLDHX'
     },
     paint: {
-      'fill-color': '#31aade',
+      'fill-color': '#368bd8',
       'fill-opacity': 0
     },
-    render_opacity: 0.1, //Use for base layers which are required to remain visible
+    render_opacity: 0.25, //Use for base layers which are required to remain visible
     tooltip_text: 'Areas of moderate risk (shown as a shaded zone X) or low risk (zone X). While the risk is reduced, nearly 25 percent of all flood claims come from these zones.',
     visibility: 'visible'
   },
@@ -380,6 +380,49 @@ var LAYERS = {
     },
     tooltip_text: 'Realtime gauge height monitoring feed',
     visibility: 'visible'
+  },
+  'sewer_mains': {
+    group_no: '1',
+    label: 'Sewer mains',
+    layer_id: 'sewer_mains',
+    type: 'line',
+    source: {
+      name: 'geojson_format',
+      type: 'geojson',
+      data: null,
+      layer: ''
+    },
+    'paint': {
+      'line-color': {
+        'property': 'year_instl',
+        'type': 'exponential',
+        'stops': [
+          [1955, '#85551b'],
+          [2015, '#1f78b4']
+        ]
+      },
+      'line-width': 1.5/*{ --not supported as yet in gl-js
+        'property': 'DIAMETER',
+        'type': 'categorical',
+        'stops': [
+          [4, 0.2],
+          [6, 0.4],
+          [8, 0.6],
+          [10, 0.8],
+          [12, 1],
+          [14, 1.2],
+          [15, 1.3],
+          [16, 1.4],
+          [18, 1.6],
+          [20, 1.8],
+          [21, 1.9],
+          [24, 2.2],
+          [99, 2.5]
+        ]
+      }*/
+    },
+    tooltip_text: 'Sewer lines & gravity mains by age & diameter',
+    visibility: 'none'
   },
   'contours': {
     group_no: '1',

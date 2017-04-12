@@ -160,7 +160,7 @@
           },
           {
             "name": "mapbox-gl-draw",
-            "path": "../node_modules/mapbox-gl/plugins/src/mapbox-gl-draw/v0.16.0",
+            "path": "../node_modules/mapbox-gl-draw/dist",
             "main": "mapbox-gl-draw",
             "resources": [
               "mapbox-gl-draw.css"

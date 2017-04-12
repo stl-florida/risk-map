@@ -10,7 +10,12 @@ export class LandingUtility {
   constructor() {
     this.map = null;
     this.mapView = '2d'; //TODO: DELETE
-    this.area_query = ['age', 'hazard', 'elevation', 'storage'];
+    this.area_query = [
+      {type: 'age', tooltip: 'Render parcels in queried polygon, color coded by building age'},
+      {type: 'hazard', tooltip: 'Render parcels in queried polygon, color coded by flood hazard'},
+      {type: 'elevation', tooltip: 'Render parcels in queried polygon, color coded by property values'},
+      {type: 'storage', tooltip: 'Render parcels & buildings in queried polygon, color coded by flood hazard & storage capacity respecively'}
+    ];
     this.sel_query_setting = 'age'; //landing.js addClass("active")
     this.isSectionPaneOpen = false;
     this.map_styles = [
@@ -290,6 +295,7 @@ export class LandingUtility {
     self.addLayer(null, LAYERS.salt_water);
     self.addLayer(null, LAYERS.contours);
     self.addLayer(null, LAYERS.stormsurge);
+    self.addLayer('/sewer', LAYERS.sewer_mains);
 
     //Control group '2'
     self.controlGroups.push({group_no: '2', name: 'City Data', id: 'city_data', controls: []});
@@ -534,7 +540,7 @@ export class LandingUtility {
             xAxisId: 'x1',
             yAxisId: 'y1',
             fill: 'top',
-            lineTension: 0,
+            lineTension: 0.1,
             spanGaps: true,
             backgroundColor: "rgba(200,200,200,0.4)",
             borderWidth: 1,
@@ -556,7 +562,7 @@ export class LandingUtility {
           display: true,
           position: 'bottom'
         },
-        bezierCurve: false,
+        bezierCurve: true,
         scales: {
           yAxes: [{
             id: 'y1',
@@ -613,6 +619,7 @@ export class LandingUtility {
     var fldhaz = self.map.queryRenderedFeatures(e.point, {layers: ['FLDHVE', 'FLDHAO', 'FLDHAE', 'FLDHAH', 'FLDHX']});
     var markers = self.map.queryRenderedFeatures(e.point, {layers: ['gw_wells']});
     var gauges = self.map.queryRenderedFeatures(e.point, {layers: ['gauges']});
+    var sewer = self.map.queryRenderedFeatures(e.point, {layers: ['sewer_mains']});
     if (features.length) {
       var feature = features[0];
       var landuse_info = 'Undefined';
@@ -657,6 +664,11 @@ export class LandingUtility {
       var wms_gauge_map = WMS.usgs_water.gauges.dynamic;
       wms_gauge_map.set('site_no', gauges[0].properties.uid);
       self.drawChart(popup, gauge, wms_gauge_map);
+    } else if (sewer.length) {
+      self.map.flyTo({center: e.lngLat});
+      popup.setLngLat(e.lngLat)
+           .setHTML('<b>Sewer gravity mains<br>Material: </b>' + sewer[0].properties.material + '<br><b>Year installed: </b>' + sewer[0].properties.year_instl + '<br><b>Diameter: </b>' + sewer[0].properties.diameter + ' ft.');
+      popup.addTo(self.map);
     }
   }
 
@@ -681,6 +693,11 @@ export class LandingUtility {
       }, toggleSpeed, () => {
         self.map.resize();
       });
+      /*$('#section_wrapper').animate({
+        width: '100%'
+      }, toggleSpeed, () => {
+        self.updateSections();
+      });*/
     } else {
       //Open
       $('.buttonIcon').toggleClass('active');
@@ -810,7 +827,8 @@ export class LandingUtility {
     }
   }
 
-  toggleTooltip(text) {
+  toggleTooltip(text, type) {
+    this.tooltip_type = type;
     this.tooltip_text = text;
   }
 
@@ -835,7 +853,9 @@ export class LandingUtility {
             self.map.removeLayer('queriedSection');
             self.map.removeSource('queriedSection');
           }
+          // Center map to section bounds
           self.map.fitBounds([[-80.4762, center[1]], [-80.07492, center[1]]]);
+          // Add reference section line
           self.map.addLayer({
             "id": "queriedSection",
             "type": "line",
@@ -868,7 +888,9 @@ export class LandingUtility {
           }).catch(err => {
             console.log(err);
           });
-          /*popup.setLngLat(center).setHTML('Loading...');
+          /*
+          // DISPLAY popup with flood hazard & landuse info
+          popup.setLngLat(center).setHTML('Loading...');
           self.pointQuery('/point/zone', latlng_obj, 'application/json')
           .then(res => {
             var popupContent = {fld_hzd: res[0].fld_zone, lnd_use: res[1].land_use};
@@ -908,7 +930,6 @@ export class LandingUtility {
         if (fldhaz.length) {
           fldhaz_info = LAYERS[fldhaz[0].layer.id].label;
         }
-
         popup.setLngLat(center)
              .setHTML('Landuse: ' + landuse_info + '<br>Flood vulnerability: ' + fldhaz_info);
         */
@@ -928,7 +949,10 @@ export class LandingUtility {
           }
         }
         if (self.sel_query_setting === 'age') {
-          self.map.removeLayer('age');
+          if (self.map.getLayer('age')) {
+            self.map.removeLayer('age');
+            self.map.removeSource('age');
+          }
           self.areaQuery('/area/age', {coords: line_string}, 'application/json')
           .then(topo_data => {
             var geo_data = topojson.feature(topo_data, topo_data.objects.output);
@@ -965,7 +989,10 @@ export class LandingUtility {
             });
           });
         } else if (self.sel_query_setting === 'hazard') {
-          self.map.removeLayer('hazard');
+          if (self.map.getLayer('hazard')) {
+            self.map.removeLayer('hazard');
+            self.map.removeSource('hazard');
+          }
           self.areaQuery('/area/hazard', {coords: line_string}, 'application/json')
           .then(topo_data => {
             var geo_data = topojson.feature(topo_data, topo_data.objects.output);
@@ -1158,16 +1185,16 @@ export class LandingUtility {
     });
   }
 
-  updateSections(e) {
+  updateSections() {
     var self = this;
     if (self.isSectionPaneOpen) {
       var left_offset = $('#map_wrapper').offset().left,
           section_yaxis_offset = 60, //width of yaxis labels
-          left_query = left_offset + section_yaxis_offset,
-          right_query = $(window).width() - left_offset,
+          left_query = section_yaxis_offset,
+          right_query = $(window).width(),
           left_coord = self.map.unproject([left_query, 100]),
           right_coord = self.map.unproject([right_query, 100]);
-      //console.log(self.cross_sections_chart);
+
       self.cross_sections_chart.options.scales.xAxes[0].ticks.min = left_coord.lng;
       self.cross_sections_chart.options.scales.xAxes[0].ticks.max = right_coord.lng;
       self.cross_sections_chart.update();

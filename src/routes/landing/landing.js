@@ -80,7 +80,7 @@ export class Landing {
     });
 
     self.utility.map.on('zoom', (e) => {
-      self.utility.updateSections(e);
+      self.utility.updateSections();
     });
 
     self.utility.map.on('draw.selectionchange', feature => {
@@ -91,16 +91,16 @@ export class Landing {
       if (self.utility.map.getLayer('red_cross') || self.utility.map.getLayer('buildings')) {
         var features;
         if (self.utility.sel_map_style === 'satellite-v9') {
-          features = self.utility.map.queryRenderedFeatures(e.point, {layers: ['red_cross', 'gauges', 'gw_wells']});
+          features = self.utility.map.queryRenderedFeatures(e.point, {layers: ['red_cross', 'gauges', 'gw_wells', 'sewer_mains']});
         } else {
-          features = self.utility.map.queryRenderedFeatures(e.point, {layers: ['buildings', 'red_cross', 'gauges', 'gw_wells']});
+          features = self.utility.map.queryRenderedFeatures(e.point, {layers: ['buildings', 'red_cross', 'gauges', 'gw_wells', 'sewer_mains']});
         }
         self.utility.map.getCanvas().style.cursor = features.length ? 'pointer' : '';
       }
     });
 
     self.utility.map.on('moveend', e => {
-      self.utility.updateSections(e);
+      self.utility.updateSections();
     });
 
     $(window).resize(() => {
